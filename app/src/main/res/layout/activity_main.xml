@@ -6,6 +6,27 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.hakito.netcar.RelativeTouchView
+        android:id="@+id/steerTouchView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="@id/throttleTouchView"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.hakito.netcar.RelativeTouchView
+        android:id="@+id/throttleTouchView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/steerTouchView" />
+
     <TextView
         android:id="@+id/statTextView"
         android:layout_width="wrap_content"
@@ -13,32 +34,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Statistics" />
-
-    <com.hakito.netcar.MySeekBar
-        android:id="@+id/steerSeekBar"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:layout_marginEnd="200dp"
-        android:max="180"
-        android:progress="90"
-        android:thumb="@null"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.hakito.netcar.MySeekBar
-        android:id="@+id/throttleSeekBar"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:max="180"
-        android:progress="90"
-        android:rotation="270"
-        android:thumb="@null"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/steerSeekBar" />
 
     <com.jjoe64.graphview.GraphView
         android:id="@+id/timeGraph"

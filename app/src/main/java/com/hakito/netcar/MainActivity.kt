@@ -13,23 +13,23 @@ import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
-import kotlin.math.min
 
 class MainActivity : AppCompatActivity() {
 
     private var sendingJob: Job? = null
 
     private val client = OkHttpClient.Builder()
-        .callTimeout(100, TimeUnit.MILLISECONDS)
+        .callTimeout(200, TimeUnit.MILLISECONDS)
         .build()
 
     private var cycles = 0
     private var successCount = 0
     private var failCount = 0
     private var maxTime = 0L
-    private var minTime = 100000L
 
     private val timeSeries = LineGraphSeries<DataPoint>()
+
+    private val errorsMap = mutableMapOf<String, Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,15 +41,14 @@ class MainActivity : AppCompatActivity() {
     private fun initTimeGraph() {
         timeGraph.apply {
             addSeries(timeSeries)
-            title = "Request time"
             gridLabelRenderer.isHorizontalLabelsVisible = false
             viewport.apply {
                 isXAxisBoundsManual = true
                 setMinX(0.0)
-                setMaxX(100.0)
+                setMaxX(50.0)
                 isYAxisBoundsManual = true
                 setMinY(0.0)
-                setMaxY(50.0)
+                setMaxY(100.0)
             }
         }
     }
@@ -69,7 +68,9 @@ class MainActivity : AppCompatActivity() {
 
             while (true) {
                 try {
-                    sendValue(steerSeekBar.progress, throttleSeekBar.progress)
+                    val steer = normalize(steerTouchView.progress?.x)
+                    val throttle = normalize(throttleTouchView.progress?.y?.unaryMinus())
+                    sendValue(steer, throttle)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -78,11 +79,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun sendValue(steer: Int, throttle: Int) {
+    private fun normalize(v: Float?): Float? {
+        v ?: return null
+
+        val scaled = v / 2
+        val withOffset = scaled + 90
+        val constrained = if (withOffset < 0) 0F else if (withOffset > 180) 180F else withOffset
+        return constrained
+    }
+
+    private suspend fun sendValue(steer: Float?, throttle: Float?) {
         cycles++
 
+        val steerValue = steer?.toInt() ?: 90
+        val throttleValue = throttle?.toInt() ?: 90
         val request = Request.Builder()
-            .url("http://192.168.4.1/car?steer=${steer}&throttle=${throttle}")
+            .url("http://192.168.4.1/car?steer=$steerValue&throttle=$throttleValue")
             .get()
             .build()
 
@@ -92,14 +104,13 @@ class MainActivity : AppCompatActivity() {
             response = client.newCall(request).execute()
         } catch (e: IOException) {
             e.printStackTrace()
+            val errorName = e.message!!
+            val count = errorsMap[errorName] ?: 0
+            errorsMap[errorName] = count + 1
         }
 
         if (response?.code() == 200) {
             successCount++
-            Log.d(
-                "SEND",
-                "Succ: ${response.body()?.string()} Time: ${response.receivedResponseAtMillis() - response.sentRequestAtMillis()}"
-            )
         } else {
             failCount++
             Log.e("SEND", "Fail")
@@ -107,18 +118,15 @@ class MainActivity : AppCompatActivity() {
         val time = response?.receivedResponseAtMillis()?.minus(response.sentRequestAtMillis())
         time?.apply {
             maxTime = max(this, maxTime)
-            minTime = min(this, minTime)
         }
 
 
         withContext(Dispatchers.Main) {
-            statTextView.text = "$cycles\n" +
-                    "$successCount:$failCount\n" +
-                    "Time: $time\n" +
+            statTextView.text = "$successCount:$failCount\n" +
                     "max: $maxTime\n" +
-                    "min: $minTime"
+                    "$errorsMap"
 
-            timeSeries.appendData(DataPoint(cycles.toDouble(), time?.toDouble() ?: 0.0), true, 100)
+            timeSeries.appendData(DataPoint(cycles.toDouble(), time?.toDouble() ?: 0.0), true, 50)
         }
     }
 
