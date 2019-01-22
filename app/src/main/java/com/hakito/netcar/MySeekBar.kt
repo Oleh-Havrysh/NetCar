@@ -12,7 +12,7 @@ constructor(context: Context, attrs: AttributeSet) :
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         val handledBySuper = super.onTouchEvent(event)
         if (event?.action == MotionEvent.ACTION_UP) {
-            progress = 500
+            progress = 90
         }
         return handledBySuper
     }
