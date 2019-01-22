@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     private var sendingJob: Job? = null
 
     private val client = OkHttpClient.Builder()
-        .callTimeout(200, TimeUnit.MILLISECONDS)
+        .callTimeout(100, TimeUnit.MILLISECONDS)
         .build()
 
     private var cycles = 0
@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                 setMaxX(50.0)
                 isYAxisBoundsManual = true
                 setMinY(0.0)
-                setMaxY(100.0)
+                setMaxY(50.0)
             }
         }
     }

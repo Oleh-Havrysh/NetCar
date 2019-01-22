@@ -20,7 +20,6 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
             return touchPoint?.minus(basePoint ?: return null)
         }
 
-
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val point = Vector(event.x, event.y)
         when (event.action) {
