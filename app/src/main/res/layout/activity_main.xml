@@ -29,11 +29,18 @@
         android:id="@+id/throttleSeekBar"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:rotation="270"
         android:max="180"
         android:progress="90"
+        android:rotation="270"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/steerSeekBar" />
+
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/timeGraph"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,6 +3,8 @@ package com.hakito.netcar
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.jjoe64.graphview.series.DataPoint
+import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
@@ -25,11 +27,31 @@ class MainActivity : AppCompatActivity() {
     private var successCount = 0
     private var failCount = 0
     private var maxTime = 0L
-    private var minTime = Long.MAX_VALUE
+    private var minTime = 100000L
+
+    private val timeSeries = LineGraphSeries<DataPoint>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        initTimeGraph()
+    }
+
+    private fun initTimeGraph() {
+        timeGraph.apply {
+            addSeries(timeSeries)
+            title = "Request time"
+            gridLabelRenderer.isHorizontalLabelsVisible = false
+            viewport.apply {
+                isXAxisBoundsManual = true
+                setMinX(0.0)
+                setMaxX(100.0)
+                isYAxisBoundsManual = true
+                setMinY(0.0)
+                setMaxY(50.0)
+            }
+        }
     }
 
     override fun onResume() {
@@ -51,8 +73,7 @@ class MainActivity : AppCompatActivity() {
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
-
-                delay(1)
+                yield()
             }
         }
     }
@@ -96,6 +117,8 @@ class MainActivity : AppCompatActivity() {
                     "Time: $time\n" +
                     "max: $maxTime\n" +
                     "min: $minTime"
+
+            timeSeries.appendData(DataPoint(cycles.toDouble(), time?.toDouble() ?: 0.0), true, 100)
         }
     }
 
