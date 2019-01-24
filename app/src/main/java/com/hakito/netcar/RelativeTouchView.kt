@@ -54,7 +54,11 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
     data class Vector(val x: Float, val y: Float) {
         fun center(v: Vector) = Vector((x + v.x) / 2, (y + v.y) / 2)
         fun len(v: Vector) = sqrt((x - v.x).pow(2) + (y - v.y).pow(2))
-        fun len() = sqrt(x.pow(2) + y.pow(2))
+        fun len() = len(ZERO)
         operator fun minus(v: Vector) = Vector(x - v.x, y - v.y)
+
+        companion object {
+            val ZERO = Vector(0f, 0f)
+        }
     }
 }
