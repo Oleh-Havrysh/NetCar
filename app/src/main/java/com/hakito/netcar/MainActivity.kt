@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         val steerValue = steer?.toInt() ?: 90
         val throttleValue = throttle?.toInt() ?: 90
         val request = Request.Builder()
-            .url("http://192.168.4.1/car?steer=$steerValue&throttle=$throttleValue")
+            .url("http://192.168.4.1:81/car?steer=$steerValue&throttle=$throttleValue")
             .get()
             .build()
 
@@ -109,8 +109,15 @@ class MainActivity : AppCompatActivity() {
             errorsMap[errorName] = count + 1
         }
 
-        if (response?.code() == 200) {
+        var voltage: Float? = null
+        if (response?.isSuccessful ?: false) {
             successCount++
+            val result = response!!.body()?.string()
+            Log.d("SEND", "Result: $result")
+            if (result != null) {
+                val rawVoltage = result.split('=')[1].toInt()
+                voltage = rawVoltage / 1023F * 10.73518518518519F
+            }
         } else {
             failCount++
             Log.e("SEND", "Fail")
@@ -120,10 +127,11 @@ class MainActivity : AppCompatActivity() {
             maxTime = max(this, maxTime)
         }
 
-
+        val voltageString = voltage?.let { String.format("%.2f", it) }
         withContext(Dispatchers.Main) {
             statTextView.text = "$successCount:$failCount\n" +
                     "max: $maxTime\n" +
+                    "V=$voltageString\n" +
                     "$errorsMap"
 
             timeSeries.appendData(DataPoint(cycles.toDouble(), time?.toDouble() ?: 0.0), true, 50)
