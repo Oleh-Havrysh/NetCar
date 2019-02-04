@@ -18,6 +18,8 @@ class MainActivity : AppCompatActivity() {
 
     private val sender: CarSender = CarSenderImpl()
 
+    private lateinit var controlPreferences: ControlPreferences
+
     private var cycles = 0
     private var successCount = 0
     private var failCount = 0
@@ -30,6 +32,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        controlPreferences = ControlPreferences(this)
+
+        dashboardButton.setOnClickListener {
+            DashboardFragment().show(supportFragmentManager, "")
+        }
 
         initTimeGraph()
     }
@@ -64,8 +72,8 @@ class MainActivity : AppCompatActivity() {
 
             while (true) {
                 try {
-                    val steer = normalize(steerTouchView.progress?.x)
-                    val throttle = normalize(throttleTouchView.progress?.y?.unaryMinus())
+                    val steer = steerTouchView.progress?.x?.run { mapSteer(normalize(this)) }
+                    val throttle = throttleTouchView.progress?.y?.run { normalize(-this) * 180 }
                     sendValue(steer, throttle)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -75,12 +83,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun normalize(v: Float?): Float? {
-        v ?: return null
+    private fun mapSteer(value: Float): Float {
+        return if (value < 0.5) {
+            val leftRange = controlPreferences.steerCenter - controlPreferences.steerMin
+            controlPreferences.steerMin + value * 2 * leftRange
+        } else {
+            val rightRange = controlPreferences.steerMax - controlPreferences.steerCenter
+            controlPreferences.steerCenter + (value - 0.5f) * 2 * rightRange
+        }
+    }
 
-        val scaled = v / 2
-        val withOffset = scaled + 90
-        val constrained = if (withOffset < 0) 0F else if (withOffset > 180) 180F else withOffset
+    private fun normalize(v: Float): Float {
+        val scaled = v / 400 + 0.5f
+        val constrained = if (scaled <= 0) 0F else if (scaled > 1) 1F else scaled
         return constrained
     }
 
