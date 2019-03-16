@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -13,7 +14,9 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
 
     private var basePoint: Vector? = null
     private var touchPoint: Vector? = null
-    private val paint = Paint()
+    private val paint = Paint().apply {
+        this.style = Paint.Style.STROKE
+    }
 
     val progress: Vector?
         get() {
@@ -41,10 +44,15 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        if (basePoint != null) {
+            canvas.drawCircle(basePoint!!.x, basePoint!!.y, 200f, paint)
+        }
         if (basePoint != null && touchPoint != null) {
             canvas.drawLine(basePoint!!.x, basePoint!!.y, touchPoint!!.x, touchPoint!!.y, paint)
             canvas.drawCircle(basePoint!!.x, basePoint!!.y, 10f, paint)
             canvas.drawCircle(touchPoint!!.x, touchPoint!!.y, 10f, paint)
+
+            canvas.drawCircle(basePoint!!.x, basePoint!!.y, min(progress!!.len(), 200f), paint)
 
             val center = basePoint!!.center(touchPoint!!)
             canvas.drawText("${progress!!.len().toInt()}", center.x, center.y, paint)

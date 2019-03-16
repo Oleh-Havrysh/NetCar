@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.logging.HttpLoggingInterceptor
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -11,6 +12,7 @@ class CarSenderImpl : CarSender {
 
     private val client = OkHttpClient.Builder()
         .callTimeout(100, TimeUnit.MILLISECONDS)
+        .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
         .build()
 
     override suspend fun send(params: CarParams): CarResponse {

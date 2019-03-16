@@ -1,6 +1,10 @@
 package com.hakito.netcar
 
+import android.content.Context
+import android.net.wifi.WifiConfiguration
+import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarSender
@@ -10,7 +14,9 @@ import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.IOException
+import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +46,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         initTimeGraph()
+        //connectWifiNetwork()
+    }
+
+    private fun connectWifiNetwork() {
+        val carNetwork = "TinyCar"
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+        val connection = wifiManager.connectionInfo
+        if (connection.ssid != carNetwork) {
+            wifiManager.isWifiEnabled = true
+            wifiManager.disconnect()
+
+            val wifiConfiguration = WifiConfiguration()
+                .apply {
+                    this.SSID = "\"$carNetwork\""
+                    this.preSharedKey = "\"espespesp\""
+                }
+            val networkId = wifiManager.addNetwork(wifiConfiguration)
+            wifiManager.enableNetwork(networkId, true)
+        }
     }
 
     private fun initTimeGraph() {
@@ -72,8 +98,9 @@ class MainActivity : AppCompatActivity() {
 
             while (true) {
                 try {
-                    val steer = steerTouchView.progress?.x?.run { mapSteer(normalize(this)) }
                     val throttle = throttleTouchView.progress?.y?.run { normalize(-this) * 180 }
+                    val throttlePercent = throttle?.run { abs((this - 90) / 90) } ?: 0f
+                    val steer = steerTouchView.progress?.x?.run { mapSteer(normalize(this), throttlePercent) }
                     sendValue(steer, throttle)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -83,13 +110,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun mapSteer(value: Float): Float {
-        return if (value < 0.5) {
+    private fun mapSteer(steerValue: Float, throttle: Float): Float {
+        val rangeScale = min(1f, max(0.1f, 1.2f - throttle))
+        Log.d("rangeScale", rangeScale.toString())
+        return if (steerValue < 0.5) {
             val leftRange = controlPreferences.steerCenter - controlPreferences.steerMin
-            controlPreferences.steerMin + value * 2 * leftRange
+            controlPreferences.steerCenter - (0.5f - steerValue) * 2 * leftRange * rangeScale
         } else {
             val rightRange = controlPreferences.steerMax - controlPreferences.steerCenter
-            controlPreferences.steerCenter + (value - 0.5f) * 2 * rightRange
+            controlPreferences.steerCenter + (steerValue - 0.5f) * 2 * rightRange * rangeScale
         }
     }
 
@@ -102,7 +131,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun sendValue(steer: Float?, throttle: Float?) {
         cycles++
 
-        val steerValue = steer?.toInt() ?: 90
+        val steerValue = steer?.toInt() ?: controlPreferences.steerCenter
         val throttleValue = throttle?.toInt() ?: 90
 
         val response =
@@ -125,11 +154,15 @@ class MainActivity : AppCompatActivity() {
 
 
         val voltageString = response?.voltage?.let { String.format("%.2f", it) }
+        val successRate = String.format("%.1f%%", 100f * successCount / cycles)
+
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
         withContext(Dispatchers.Main) {
-            statTextView.text = "$successCount:$failCount\n" +
+            statTextView.text = "Success: $successRate\n" +
                     "max: $maxTime\n" +
                     "V=$voltageString\n" +
-                    "$errorsMap"
+                    "$errorsMap\n"
 
             timeSeries.appendData(DataPoint(cycles.toDouble(), response?.responseTime?.toDouble() ?: 0.0), true, 50)
         }
