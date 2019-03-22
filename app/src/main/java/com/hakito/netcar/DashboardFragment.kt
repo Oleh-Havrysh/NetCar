@@ -3,6 +3,7 @@ package com.hakito.netcar
 import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 
@@ -27,6 +28,27 @@ class DashboardFragment : DialogFragment() {
     }
 
     private fun setupView() {
+        dialog.voltageMultiplierEditText.apply {
+            setText(controlPreferences.voltageMultiplier.toString())
+            addTextChangedListener {
+                controlPreferences.voltageMultiplier = text.toString().toFloatOrNull() ?: 1f
+            }
+        }
+
+        dialog.invertSteerCheckBox.apply {
+            isChecked = controlPreferences.invertSteer
+            setOnCheckedChangeListener { _, isChecked ->
+                controlPreferences.invertSteer = isChecked
+            }
+        }
+
+        dialog.throttleLimitSeekBar.apply {
+            progress = controlPreferences.throttleMax
+            onProgressChangedListener = {
+                controlPreferences.throttleMax = it
+            }
+        }
+
         dialog.steerStartSeekBar.apply {
             progress = controlPreferences.steerMin
             onProgressChangedListener = this@DashboardFragment::onSteerStartChanged

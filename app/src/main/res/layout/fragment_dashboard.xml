@@ -4,6 +4,7 @@
             android:layout_height="wrap_content">
 
     <LinearLayout
+            android:padding="8dp"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -17,7 +18,7 @@
                                                  android:id="@+id/lightSeekBar"
                                                  android:layout_height="wrap_content"
                                                  android:max="180"/>
-
+        <include layout="@layout/divider"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -57,7 +58,7 @@
                                                  android:layout_height="wrap_content"
                                                  android:id="@+id/steerEndSeekBar"
                                                  android:max="180"/>
-
+        <include layout="@layout/divider"/>
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -67,6 +68,18 @@
                                                  android:id="@+id/throttleLimitSeekBar"
                                                  android:layout_height="wrap_content"
                                                  android:max="180"/>
+        <include layout="@layout/divider"/>
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Voltage multiplier"/>
+
+        <EditText
+                android:inputType="numberDecimal"
+                android:id="@+id/voltageMultiplierEditText"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"/>
 
     </LinearLayout>
 

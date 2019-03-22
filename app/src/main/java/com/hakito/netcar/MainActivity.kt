@@ -1,7 +1,6 @@
 package com.hakito.netcar
 
 import android.content.Context
-import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
@@ -46,26 +45,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         initTimeGraph()
-        //connectWifiNetwork()
-    }
-
-    private fun connectWifiNetwork() {
-        val carNetwork = "TinyCar"
-        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-
-        val connection = wifiManager.connectionInfo
-        if (connection.ssid != carNetwork) {
-            wifiManager.isWifiEnabled = true
-            wifiManager.disconnect()
-
-            val wifiConfiguration = WifiConfiguration()
-                .apply {
-                    this.SSID = "\"$carNetwork\""
-                    this.preSharedKey = "\"espespesp\""
-                }
-            val networkId = wifiManager.addNetwork(wifiConfiguration)
-            wifiManager.enableNetwork(networkId, true)
-        }
     }
 
     private fun initTimeGraph() {
@@ -100,7 +79,9 @@ class MainActivity : AppCompatActivity() {
                 try {
                     val throttle = throttleTouchView.progress?.y?.run { normalize(-this) * 180 }
                     val throttlePercent = throttle?.run { abs((this - 90) / 90) } ?: 0f
-                    val steer = steerTouchView.progress?.x?.run { mapSteer(normalize(this), throttlePercent) }
+                    val steer = steerTouchView.progress?.x
+                        ?.times(if (controlPreferences.invertSteer) -1 else 1)
+                        ?.run { mapSteer(normalize(this), throttlePercent) }
                     sendValue(steer, throttle)
                 } catch (e: IOException) {
                     e.printStackTrace()

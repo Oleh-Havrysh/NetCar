@@ -8,9 +8,7 @@ class ControlPreferences(context: Context) {
     private val preferences = context.getSharedPreferences(CONTROL_PREFERENCES, Context.MODE_PRIVATE)
 
     var steerMin: Int
-        get() {
-            return preferences.getInt(STEER_MIN, 0)
-        }
+        get() = preferences.getInt(STEER_MIN, 0)
         set(value) {
             preferences.edit {
                 putInt(STEER_MIN, value)
@@ -18,9 +16,7 @@ class ControlPreferences(context: Context) {
         }
 
     var steerCenter: Int
-        get() {
-            return preferences.getInt(STEER_CENTER, 90)
-        }
+        get() = preferences.getInt(STEER_CENTER, 90)
         set(value) {
             preferences.edit {
                 putInt(STEER_CENTER, value)
@@ -28,12 +24,34 @@ class ControlPreferences(context: Context) {
         }
 
     var steerMax: Int
-        get() {
-            return preferences.getInt(STEER_MAX, 180)
-        }
+        get() = preferences.getInt(STEER_MAX, 180)
         set(value) {
             preferences.edit {
                 putInt(STEER_MAX, value)
+            }
+        }
+
+    var invertSteer: Boolean
+        get() = preferences.getBoolean(INVERT_STEER, false)
+        set(value) {
+            preferences.edit {
+                putBoolean(INVERT_STEER, value)
+            }
+        }
+
+    var throttleMax: Int
+        get() = preferences.getInt(THROTTLE_MAX, 90)
+        set(value) {
+            preferences.edit {
+                putInt(THROTTLE_MAX, value)
+            }
+        }
+
+    var voltageMultiplier: Float
+        get() = preferences.getFloat(VOLTAGE_MULTIPLIER, 1f)
+        set(value) {
+            preferences.edit {
+                putFloat(VOLTAGE_MULTIPLIER, value)
             }
         }
 
@@ -42,5 +60,8 @@ class ControlPreferences(context: Context) {
         private const val STEER_MIN = "STEER_MIN"
         private const val STEER_CENTER = "STEER_CENTER"
         private const val STEER_MAX = "STEER_MAX"
+        private const val INVERT_STEER = "INVERT_STEER"
+        private const val THROTTLE_MAX = "THROTTLE_MAX"
+        private const val VOLTAGE_MULTIPLIER = "VOLTAGE_MULTIPLIER"
     }
 }

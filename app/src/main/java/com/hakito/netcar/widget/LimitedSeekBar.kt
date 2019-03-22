@@ -56,8 +56,6 @@ constructor(context: Context, attrs: AttributeSet) :
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawText(minLimit.toString(), 0f, 20f, paint)
         canvas.drawText(progress.toString(), width / 2f, 20f, paint)
-        canvas.drawText(maxLimit.toString(), width - 60f, 20f, paint)
     }
 }
