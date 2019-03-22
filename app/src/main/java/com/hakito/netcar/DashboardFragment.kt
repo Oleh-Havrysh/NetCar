@@ -27,57 +27,42 @@ class DashboardFragment : DialogFragment() {
     }
 
     private fun setupView() {
-        dialog.lightPicker.apply {
-            minValue = 0
-            maxValue = 3
-            displayedValues = arrayOf("Off", "Parking", "Low", "High")
+        dialog.steerStartSeekBar.apply {
+            progress = controlPreferences.steerMin
+            onProgressChangedListener = this@DashboardFragment::onSteerStartChanged
         }
 
-        dialog.steerStartPicker.apply {
-            wrapSelectorWheel = false
-            minValue = 0
-            maxValue = 180
-            value = controlPreferences.steerMin
-            setOnValueChangedListener { _, _, newVal ->
-                onSteerStartChanged(newVal)
-            }
+        dialog.steerCenterSeekBar.apply {
+            progress = controlPreferences.steerCenter
+            onProgressChangedListener = this@DashboardFragment::onSteerCenterChanged
         }
 
-        dialog.steerCenterPicker.apply {
-            wrapSelectorWheel = false
-            minValue = 0
-            maxValue = 180
-            value = controlPreferences.steerCenter
-            setOnValueChangedListener { _, _, newVal ->
-                onSteerCenterChanged(newVal)
-            }
+        dialog.steerEndSeekBar.apply {
+            progress = controlPreferences.steerMax
+            onProgressChangedListener = this@DashboardFragment::onSteerEndChanged
         }
 
-        dialog.steerEndPicker.apply {
-            wrapSelectorWheel = false
-            minValue = 0
-            maxValue = 180
-            value = controlPreferences.steerMax
-            setOnValueChangedListener { _, _, newVal ->
-                onSteerEndChanged(newVal)
-            }
-        }
+        dialog.steerStartSeekBar.maxLimit = controlPreferences.steerCenter
 
+        dialog.steerCenterSeekBar.minLimit = controlPreferences.steerMin
+        dialog.steerCenterSeekBar.maxLimit = controlPreferences.steerMax
+
+        dialog.steerEndSeekBar.minLimit = controlPreferences.steerCenter
     }
 
     private fun onSteerStartChanged(value: Int) {
-        dialog.steerCenterPicker.minValue = value
-        dialog.steerEndPicker.minValue = value
+        dialog.steerCenterSeekBar.minLimit = value
         controlPreferences.steerMin = value
     }
 
     private fun onSteerCenterChanged(value: Int) {
+        dialog.steerStartSeekBar.maxLimit = value
+        dialog.steerEndSeekBar.minLimit = value
         controlPreferences.steerCenter = value
     }
 
     private fun onSteerEndChanged(value: Int) {
-        dialog.steerCenterPicker.maxValue = value
-        dialog.steerStartPicker.maxValue = value
+        dialog.steerCenterSeekBar.maxLimit = value
         controlPreferences.steerMax = value
     }
 }

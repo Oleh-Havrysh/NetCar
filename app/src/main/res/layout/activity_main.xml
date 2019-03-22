@@ -13,14 +13,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.hakito.netcar.RelativeTouchView
+    <com.hakito.netcar.widget.RelativeTouchView
         android:id="@+id/steerTouchView"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         app:layout_constraintEnd_toStartOf="@id/throttleTouchView"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.hakito.netcar.RelativeTouchView
+    <com.hakito.netcar.widget.RelativeTouchView
         android:id="@+id/throttleTouchView"
         android:layout_width="0dp"
         android:layout_height="match_parent"

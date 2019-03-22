@@ -1,4 +1,4 @@
-package com.hakito.netcar
+package com.hakito.netcar.widget
 
 import android.content.Context
 import android.graphics.Canvas
