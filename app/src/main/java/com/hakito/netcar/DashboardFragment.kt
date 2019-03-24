@@ -35,6 +35,13 @@ class DashboardFragment : DialogFragment() {
             }
         }
 
+        dialog.requestTimeoutEditText.apply {
+            setText(controlPreferences.requestTimeout.toString())
+            addTextChangedListener {
+                controlPreferences.requestTimeout = text.toString().toLongOrNull() ?: 100L
+            }
+        }
+
         dialog.invertSteerCheckBox.apply {
             isChecked = controlPreferences.invertSteer
             setOnCheckedChangeListener { _, isChecked ->

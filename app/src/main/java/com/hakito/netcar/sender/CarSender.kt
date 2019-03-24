@@ -7,4 +7,4 @@ interface CarSender {
 
 data class CarParams(val steer: Int, var throttle: Int)
 
-data class CarResponse(val voltage: Float, val responseTime: Long)
+data class CarResponse(val voltageRaw: Float, val responseTime: Long)

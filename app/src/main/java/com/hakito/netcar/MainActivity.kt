@@ -1,7 +1,5 @@
 package com.hakito.netcar
 
-import android.content.Context
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private var sendingJob: Job? = null
 
-    private val sender: CarSender = CarSenderImpl()
+    private lateinit var sender: CarSender
 
     private lateinit var controlPreferences: ControlPreferences
 
@@ -45,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         initTimeGraph()
+
+        sender = CarSenderImpl(controlPreferences)
     }
 
     private fun initTimeGraph() {
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                 setMaxX(50.0)
                 isYAxisBoundsManual = true
                 setMinY(0.0)
-                setMaxY(50.0)
+                setMaxY(controlPreferences.requestTimeout.toDouble())
             }
         }
     }
@@ -134,10 +134,9 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        val voltageString = response?.voltage?.let { String.format("%.2f", it) }
+        val voltageString =
+            response?.voltageRaw?.times(controlPreferences.voltageMultiplier)?.let { String.format("%.2f", it) }
         val successRate = String.format("%.1f%%", 100f * successCount / cycles)
-
-        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
         withContext(Dispatchers.Main) {
             statTextView.text = "Success: $successRate\n" +

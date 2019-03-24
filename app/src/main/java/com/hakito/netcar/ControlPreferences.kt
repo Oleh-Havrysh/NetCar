@@ -55,6 +55,14 @@ class ControlPreferences(context: Context) {
             }
         }
 
+    var requestTimeout: Long
+        get() = preferences.getLong(REQUEST_TIMEOUT, 100)
+        set(value) {
+            preferences.edit {
+                putLong(REQUEST_TIMEOUT, value)
+            }
+        }
+
     companion object {
         private const val CONTROL_PREFERENCES = "CONTROL_PREFERENCES"
         private const val STEER_MIN = "STEER_MIN"
@@ -63,5 +71,6 @@ class ControlPreferences(context: Context) {
         private const val INVERT_STEER = "INVERT_STEER"
         private const val THROTTLE_MAX = "THROTTLE_MAX"
         private const val VOLTAGE_MULTIPLIER = "VOLTAGE_MULTIPLIER"
+        private const val REQUEST_TIMEOUT = "REQUEST_TIMEOUT"
     }
 }
