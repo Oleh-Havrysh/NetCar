@@ -72,7 +72,7 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
 
         fun divide(v: Float) = Vector(x / v, y / v)
 
-        fun times(v: Float) = Vector(x * 2, y * v)
+        fun times(v: Float) = Vector(x * v, y * v)
 
         fun center(v: Vector) = Vector((x + v.x) / 2, (y + v.y) / 2)
 
