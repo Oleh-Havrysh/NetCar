@@ -40,7 +40,7 @@ class ControlPreferences(context: Context) {
         }
 
     var throttleMax: Int
-        get() = preferences.getInt(THROTTLE_MAX, 90)
+        get() = preferences.getInt(THROTTLE_MAX, 45)
         set(value) {
             preferences.edit {
                 putInt(THROTTLE_MAX, value)

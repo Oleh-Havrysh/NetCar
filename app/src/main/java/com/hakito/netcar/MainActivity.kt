@@ -1,7 +1,6 @@
 package com.hakito.netcar
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarSender
@@ -11,7 +10,7 @@ import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.IOException
-import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
@@ -24,8 +23,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var controlPreferences: ControlPreferences
 
     private var cycles = 0
-    private var successCount = 0
-    private var failCount = 0
     private var maxTime = 0L
 
     private val timeSeries = LineGraphSeries<DataPoint>()
@@ -77,11 +74,10 @@ class MainActivity : AppCompatActivity() {
 
             while (true) {
                 try {
-                    val throttle = throttleTouchView.progress?.y?.run { normalize(-this) * 180 }
-                    val throttlePercent = throttle?.run { abs((this - 90) / 90) } ?: 0f
+                    val throttle = throttleTouchView.progress?.y?.times(controlPreferences.throttleMax)?.plus(90)
                     val steer = steerTouchView.progress?.x
                         ?.times(if (controlPreferences.invertSteer) -1 else 1)
-                        ?.run { mapSteer(normalize(this), throttlePercent) }
+                        ?.run { mapSteer(this, throttleTouchView.progress?.y?.absoluteValue ?: 0f) }
                     sendValue(steer, throttle)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -91,22 +87,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun mapSteer(steerValue: Float, throttle: Float): Float {
-        val rangeScale = min(1f, max(0.1f, 1.2f - throttle))
-        Log.d("rangeScale", rangeScale.toString())
-        return if (steerValue < 0.5) {
-            val leftRange = controlPreferences.steerCenter - controlPreferences.steerMin
-            controlPreferences.steerCenter - (0.5f - steerValue) * 2 * leftRange * rangeScale
-        } else {
-            val rightRange = controlPreferences.steerMax - controlPreferences.steerCenter
-            controlPreferences.steerCenter + (steerValue - 0.5f) * 2 * rightRange * rangeScale
-        }
-    }
-
-    private fun normalize(v: Float): Float {
-        val scaled = v / 400 + 0.5f
-        val constrained = if (scaled <= 0) 0F else if (scaled > 1) 1F else scaled
-        return constrained
+    private fun mapSteer(steerValue: Float, throttlePercent: Float): Float {
+        val range = if (steerValue < 0)
+            controlPreferences.steerCenter - controlPreferences.steerMin
+        else
+            controlPreferences.steerMax - controlPreferences.steerCenter
+        return controlPreferences.steerCenter + steerValue * range * min(1f, 1.3f - throttlePercent)
     }
 
     private suspend fun sendValue(steer: Float?, throttle: Float?) {
@@ -127,21 +113,16 @@ class MainActivity : AppCompatActivity() {
             }
 
         if (response != null) {
-            successCount++
             maxTime = max(response.responseTime, maxTime)
-        } else {
-            failCount++
         }
-
 
         val voltageString =
             response?.voltageRaw?.times(controlPreferences.voltageMultiplier)?.let { String.format("%.2f", it) }
-        val successRate = String.format("%.1f%%", 100f * successCount / cycles)
 
         withContext(Dispatchers.Main) {
-            statTextView.text = "Success: $successRate\n" +
-                    "max: $maxTime\n" +
+            statTextView.text = "max: $maxTime\n" +
                     "V=$voltageString\n" +
+                    "steer: $steerValue, throttle: $throttleValue\n" +
                     "$errorsMap\n"
 
             timeSeries.appendData(DataPoint(cycles.toDouble(), response?.responseTime?.toDouble() ?: 0.0), true, 50)

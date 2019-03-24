@@ -67,7 +67,7 @@
         <com.hakito.netcar.widget.LimitedSeekBar android:layout_width="match_parent"
                                                  android:id="@+id/throttleLimitSeekBar"
                                                  android:layout_height="wrap_content"
-                                                 android:max="180"/>
+                                                 android:max="90"/>
         <include layout="@layout/divider"/>
 
         <TextView
