@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
             while (true) {
                 try {
-                    val throttle = throttleTouchView.progress?.y?.times(controlPreferences.throttleMax)?.plus(90)
+                    val throttle = throttleTouchView.progress?.y?.times(controlPreferences.throttleMax)?.plus(1500)
                     val steer = steerTouchView.progress?.x
                         ?.times(if (controlPreferences.invertSteer) -1 else 1)
                         ?.run { mapSteer(this, throttleTouchView.progress?.y?.absoluteValue ?: 0f) }
