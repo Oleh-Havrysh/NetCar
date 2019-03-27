@@ -10,9 +10,7 @@ import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.IOException
-import kotlin.math.absoluteValue
 import kotlin.math.max
-import kotlin.math.min
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,6 +27,8 @@ class MainActivity : AppCompatActivity() {
 
     private val errorsMap = mutableMapOf<String, Int>()
 
+    private var maxSpeed = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,6 +40,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         initTimeGraph()
+
+        speedometer.apply {
+            setNeedleStepFactor(25f)
+            setDeltaTimeInterval(0)
+        }
 
         sender = CarSenderImpl(controlPreferences)
     }
@@ -74,10 +79,13 @@ class MainActivity : AppCompatActivity() {
 
             while (true) {
                 try {
-                    val throttle = throttleTouchView.progress?.y?.times(controlPreferences.throttleMax)?.plus(90)
+                    val throttle =
+                        throttleTouchView.progress?.y
+                            ?.times(controlPreferences.throttleMax * ServoConstants.AMPLITUDE)
+                            ?.plus(ServoConstants.CENTER)
                     val steer = steerTouchView.progress?.x
                         ?.times(if (controlPreferences.invertSteer) -1 else 1)
-                        ?.run { mapSteer(this, throttleTouchView.progress?.y?.absoluteValue ?: 0f) }
+                        ?.run { mapSteer(this) }
                     sendValue(steer, throttle)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -87,19 +95,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun mapSteer(steerValue: Float, throttlePercent: Float): Float {
+    private fun mapSteer(steerValue: Float): Float {
         val range = if (steerValue < 0)
-            controlPreferences.steerCenter - controlPreferences.steerMin
+            controlPreferences.steerCenter.toServoValue() - controlPreferences.steerMin.toServoValue()
         else
-            controlPreferences.steerMax - controlPreferences.steerCenter
-        return controlPreferences.steerCenter + steerValue * range * min(1f, 1.3f - throttlePercent)
+            controlPreferences.steerMax.toServoValue() - controlPreferences.steerCenter.toServoValue()
+        return controlPreferences.steerCenter.toServoValue() + steerValue * range
     }
 
     private suspend fun sendValue(steer: Float?, throttle: Float?) {
         cycles++
 
-        val steerValue = steer?.toInt() ?: controlPreferences.steerCenter
-        val throttleValue = throttle?.toInt() ?: 90
+        val steerValue = steer?.toInt() ?: controlPreferences.steerCenter.toServoValue().toInt()
+        val throttleValue = throttle?.toInt() ?: ServoConstants.CENTER
 
         val response =
             try {
@@ -116,17 +124,32 @@ class MainActivity : AppCompatActivity() {
             maxTime = max(response.responseTime, maxTime)
         }
 
+        val speed = response?.rpm?.let { getSpeed(it) }
+
         val voltageString =
             response?.voltageRaw?.times(controlPreferences.voltageMultiplier)?.let { String.format("%.2f", it) }
 
         withContext(Dispatchers.Main) {
+            speed?.apply {
+                speedometer.moveToValue(toFloat())
+                maxSpeed = max(maxSpeed, this)
+            }
             statTextView.text = "max: $maxTime\n" +
                     "V=$voltageString\n" +
                     "steer: $steerValue, throttle: $throttleValue\n" +
+                    "rpm=${response?.rpm}\n" +
+                    "speed = $speed kmh\n" +
+                    "maxSpeed = $maxSpeed kmh\n" +
                     "$errorsMap\n"
 
             timeSeries.appendData(DataPoint(cycles.toDouble(), response?.responseTime?.toDouble() ?: 0.0), true, 50)
         }
+    }
+
+    private fun getSpeed(rpm: Int): Int {
+        val wheelLength = 5.5f * Math.PI
+        return ((rpm * 60 * wheelLength)
+                / (100 * 1000)).toInt()
     }
 
     private fun stopSending() {

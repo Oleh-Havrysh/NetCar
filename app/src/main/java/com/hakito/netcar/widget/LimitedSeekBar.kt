@@ -6,24 +6,31 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.widget.SeekBar
 import androidx.appcompat.widget.AppCompatSeekBar
+import kotlin.math.roundToInt
 
 class LimitedSeekBar
 constructor(context: Context, attrs: AttributeSet) :
     AppCompatSeekBar(context, attrs) {
 
-    var minLimit: Int? = null
+    var percentMinLimit: Float? = null
         set(value) {
             field = value
             invalidate()
         }
 
-    var maxLimit: Int? = null
+    var percentMaxLimit: Float? = null
         set(value) {
             field = value
             invalidate()
         }
 
-    var onProgressChangedListener: ((Int) -> Unit)? = null
+    var percentProgress: Float
+        get() = progress.toFloat() / max
+        set(value) {
+            progress = (value * max).roundToInt()
+        }
+
+    var onProgressChangedListener: ((Float) -> Unit)? = null
 
     private val paint = Paint().apply {
         textSize = 20f
@@ -42,20 +49,21 @@ constructor(context: Context, attrs: AttributeSet) :
     }
 
     private fun onProgressChanged(newProgress: Int) {
-        val minLimit = minLimit ?: 0
-        val maxLimit = maxLimit ?: max
-        progress = if (newProgress < minLimit) {
+        val newPercentProgress = newProgress.toFloat() / max
+        val minLimit = percentMinLimit ?: 0f
+        val maxLimit = percentMaxLimit ?: 1f
+        percentProgress = if (newPercentProgress < minLimit) {
             minLimit
-        } else if (newProgress > maxLimit) {
+        } else if (newPercentProgress > maxLimit) {
             maxLimit
         } else {
-            newProgress
+            newPercentProgress
         }
-        onProgressChangedListener?.invoke(progress)
+        onProgressChangedListener?.invoke(percentProgress)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawText(progress.toString(), width / 2f, 20f, paint)
+        canvas.drawText(String.format("%1$.2f", percentProgress), width / 2f, 20f, paint)
     }
 }

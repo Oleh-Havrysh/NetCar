@@ -50,48 +50,48 @@ class DashboardFragment : DialogFragment() {
         }
 
         dialog.throttleLimitSeekBar.apply {
-            progress = controlPreferences.throttleMax
+            percentProgress = controlPreferences.throttleMax
             onProgressChangedListener = {
                 controlPreferences.throttleMax = it
             }
         }
 
         dialog.steerStartSeekBar.apply {
-            progress = controlPreferences.steerMin
+            percentProgress = controlPreferences.steerMin
             onProgressChangedListener = this@DashboardFragment::onSteerStartChanged
         }
 
         dialog.steerCenterSeekBar.apply {
-            progress = controlPreferences.steerCenter
+            percentProgress = controlPreferences.steerCenter
             onProgressChangedListener = this@DashboardFragment::onSteerCenterChanged
         }
 
         dialog.steerEndSeekBar.apply {
-            progress = controlPreferences.steerMax
+            percentProgress = controlPreferences.steerMax
             onProgressChangedListener = this@DashboardFragment::onSteerEndChanged
         }
 
-        dialog.steerStartSeekBar.maxLimit = controlPreferences.steerCenter
+        dialog.steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
 
-        dialog.steerCenterSeekBar.minLimit = controlPreferences.steerMin
-        dialog.steerCenterSeekBar.maxLimit = controlPreferences.steerMax
+        dialog.steerCenterSeekBar.percentMinLimit = controlPreferences.steerMin
+        dialog.steerCenterSeekBar.percentMaxLimit = controlPreferences.steerMax
 
-        dialog.steerEndSeekBar.minLimit = controlPreferences.steerCenter
+        dialog.steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
     }
 
-    private fun onSteerStartChanged(value: Int) {
-        dialog.steerCenterSeekBar.minLimit = value
+    private fun onSteerStartChanged(value: Float) {
+        dialog.steerCenterSeekBar.percentMinLimit = value
         controlPreferences.steerMin = value
     }
 
-    private fun onSteerCenterChanged(value: Int) {
-        dialog.steerStartSeekBar.maxLimit = value
-        dialog.steerEndSeekBar.minLimit = value
+    private fun onSteerCenterChanged(value: Float) {
+        dialog.steerStartSeekBar.percentMaxLimit = value
+        dialog.steerEndSeekBar.percentMinLimit = value
         controlPreferences.steerCenter = value
     }
 
-    private fun onSteerEndChanged(value: Int) {
-        dialog.steerCenterSeekBar.maxLimit = value
+    private fun onSteerEndChanged(value: Float) {
+        dialog.steerCenterSeekBar.percentMaxLimit = value
         controlPreferences.steerMax = value
     }
 }

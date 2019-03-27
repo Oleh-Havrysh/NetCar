@@ -7,27 +7,27 @@ class ControlPreferences(context: Context) {
 
     private val preferences = context.getSharedPreferences(CONTROL_PREFERENCES, Context.MODE_PRIVATE)
 
-    var steerMin: Int
-        get() = preferences.getInt(STEER_MIN, 0)
+    var steerMin: Float
+        get() = preferences.getFloat(STEER_MIN, 0f)
         set(value) {
             preferences.edit {
-                putInt(STEER_MIN, value)
+                putFloat(STEER_MIN, value)
             }
         }
 
-    var steerCenter: Int
-        get() = preferences.getInt(STEER_CENTER, 90)
+    var steerCenter: Float
+        get() = preferences.getFloat(STEER_CENTER, 0.5f)
         set(value) {
             preferences.edit {
-                putInt(STEER_CENTER, value)
+                putFloat(STEER_CENTER, value)
             }
         }
 
-    var steerMax: Int
-        get() = preferences.getInt(STEER_MAX, 180)
+    var steerMax: Float
+        get() = preferences.getFloat(STEER_MAX, 1f)
         set(value) {
             preferences.edit {
-                putInt(STEER_MAX, value)
+                putFloat(STEER_MAX, value)
             }
         }
 
@@ -39,11 +39,11 @@ class ControlPreferences(context: Context) {
             }
         }
 
-    var throttleMax: Int
-        get() = preferences.getInt(THROTTLE_MAX, 45)
+    var throttleMax: Float
+        get() = preferences.getFloat(THROTTLE_MAX, 0.5f)
         set(value) {
             preferences.edit {
-                putInt(THROTTLE_MAX, value)
+                putFloat(THROTTLE_MAX, value)
             }
         }
 

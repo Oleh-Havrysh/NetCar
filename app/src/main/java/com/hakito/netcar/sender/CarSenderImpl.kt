@@ -25,17 +25,29 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
         val response = client.newCall(request).execute()
 
         if (response.isSuccessful) {
-            val voltageRaw = parseVoltageRaw(response.body()!!.string())
+            val responseString = response.body()!!.string()
+            val voltageRaw = parseVoltageRaw(responseString)
+            val rpm = try {
+                parseRpm(responseString)
+            } catch (e: Exception) {
+                0
+            }
             val time = response.receivedResponseAtMillis() - response.sentRequestAtMillis()
-            return CarResponse(voltageRaw, time)
+            return CarResponse(voltageRaw, time, rpm)
         }
 
         throw IOException("Request failed")
     }
 
+    private fun parseRpm(response: String): Int {
+        val fields = response.split(',')
+        return fields[1].split('=')[1].toInt()
+    }
+
     //TODO: use some response format e.g. JSON
     private fun parseVoltageRaw(response: String): Float {
-        val rawVoltage = response.split('=')[1].toInt()
+        val fields = response.split(',')
+        val rawVoltage = fields[0].split('=')[1].toInt()
         val voltage = rawVoltage.toFloat() / VOLTAGE_RAW_MAX
         return voltage
     }

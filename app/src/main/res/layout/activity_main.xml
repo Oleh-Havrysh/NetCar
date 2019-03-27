@@ -1,56 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                   xmlns:tools="http://schemas.android.com/tools"
-                                                   android:layout_width="match_parent"
-                                                   android:layout_height="match_parent"
-                                                   tools:context=".MainActivity">
-
-    <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="#000"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-    <com.hakito.netcar.widget.RelativeTouchView
-            android:id="@+id/steerTouchView"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            app:layout_constraintEnd_toStartOf="@id/throttleTouchView"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-    <com.hakito.netcar.widget.RelativeTouchView
-            android:id="@+id/throttleTouchView"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/steerTouchView"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
     <TextView
-            android:id="@+id/statTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxWidth="300dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Statistics"/>
+        android:id="@+id/statTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="300dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Statistics" />
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#51000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <de.nitri.gauge.Gauge
+        android:id="@+id/speedometer"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:maxValue="30"
+        app:minValue="0"
+        app:lowerText="km/h"
+        app:totalNicks="40"
+        app:valuePerNick="1" />
+
+    <com.hakito.netcar.widget.RelativeTouchView
+        android:id="@+id/steerTouchView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toStartOf="@id/throttleTouchView"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.hakito.netcar.widget.RelativeTouchView
+        android:id="@+id/throttleTouchView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/steerTouchView" />
 
     <com.jjoe64.graphview.GraphView
-            android:id="@+id/timeGraph"
-            android:layout_width="200dp"
-            android:layout_height="80dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+        android:id="@+id/timeGraph"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-            android:padding="8dp"
-            android:background="@android:drawable/list_selector_background"
-            android:id="@+id/dashboardButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_preferences"
-            app:layout_constraintEnd_toStartOf="@id/timeGraph"
-            app:layout_constraintTop_toTopOf="parent"/>
+        android:id="@+id/dashboardButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/list_selector_background"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_preferences"
+        app:layout_constraintEnd_toStartOf="@id/timeGraph"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
