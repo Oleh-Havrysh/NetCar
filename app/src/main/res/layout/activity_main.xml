@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:id="@+id/image"
+        tools:src="@tools:sample/backgrounds/scenic"
+        android:layout_height="match_parent" />
+
     <TextView
         android:id="@+id/statTextView"
         android:layout_width="wrap_content"
@@ -33,6 +39,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:maxValue="30"
         app:minValue="0"
+        android:visibility="gone"
         app:lowerText="km/h"
         app:totalNicks="40"
         app:valuePerNick="1" />

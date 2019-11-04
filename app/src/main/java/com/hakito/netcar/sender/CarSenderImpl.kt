@@ -1,5 +1,7 @@
 package com.hakito.netcar.sender
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.annotation.VisibleForTesting
 import com.hakito.netcar.ControlPreferences
 import okhttp3.HttpUrl
@@ -13,7 +15,9 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
 
     private val client = OkHttpClient.Builder()
         .callTimeout(preferences.requestTimeout, TimeUnit.MILLISECONDS)
-        .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        })
         .build()
 
     override suspend fun send(params: CarParams): CarResponse {
@@ -26,7 +30,7 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
 
         if (response.isSuccessful) {
             val responseString = response.body()!!.string()
-            val voltageRaw = parseVoltageRaw(responseString)
+            val voltageRaw = runCatching { parseVoltageRaw(responseString) }.getOrNull() ?: 0f
             val rpm = try {
                 parseRpm(responseString)
             } catch (e: Exception) {
@@ -36,6 +40,20 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
             return CarResponse(voltageRaw, time, rpm)
         }
 
+        throw IOException("Request failed")
+    }
+
+    override suspend fun getImage(): Bitmap {
+        val request = Request.Builder()
+            .url("http://192.168.4.1:80/camera")
+            .get()
+            .build()
+
+        val response = client.newCall(request).execute()
+
+        if (response.isSuccessful) {
+            return BitmapFactory.decodeStream(response.body()!!.byteStream())
+        }
         throw IOException("Request failed")
     }
 
@@ -63,6 +81,7 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
             .addQueryParameter("throttle", params.throttle.toString())
             .build()
     }
+
 
     companion object {
         private const val VOLTAGE_RAW_MAX = 1023

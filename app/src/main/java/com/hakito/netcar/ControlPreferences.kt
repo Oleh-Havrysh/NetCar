@@ -56,7 +56,7 @@ class ControlPreferences(context: Context) {
         }
 
     var requestTimeout: Long
-        get() = preferences.getLong(REQUEST_TIMEOUT, 100)
+        get() = preferences.getLong(REQUEST_TIMEOUT, 500)
         set(value) {
             preferences.edit {
                 putLong(REQUEST_TIMEOUT, value)

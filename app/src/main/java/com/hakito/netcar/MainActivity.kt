@@ -74,9 +74,10 @@ class MainActivity : AppCompatActivity() {
         stopSending()
     }
 
+    var cameraJob: Job? = null
+
     private fun startSending() {
         sendingJob = GlobalScope.launch(Dispatchers.IO) {
-
             while (true) {
                 try {
                     val throttle =
@@ -91,6 +92,15 @@ class MainActivity : AppCompatActivity() {
                     e.printStackTrace()
                 }
                 yield()
+            }
+        }
+        return
+        cameraJob = GlobalScope.launch(Dispatchers.IO) {
+            while (true) {
+                val bitmap = runCatching { sender.getImage() }.getOrNull()
+                launch(Dispatchers.Main) {
+                    bitmap?.also { image.setImageBitmap(it) }
+                }
             }
         }
     }
@@ -127,7 +137,8 @@ class MainActivity : AppCompatActivity() {
         val speed = response?.rpm?.let { getSpeed(it) }
 
         val voltageString =
-            response?.voltageRaw?.times(controlPreferences.voltageMultiplier)?.let { String.format("%.2f", it) }
+            response?.voltageRaw?.times(controlPreferences.voltageMultiplier)
+                ?.let { String.format("%.2f", it) }
 
         withContext(Dispatchers.Main) {
             speed?.apply {
@@ -142,7 +153,12 @@ class MainActivity : AppCompatActivity() {
                     "maxSpeed = $maxSpeed kmh\n" +
                     "$errorsMap\n"
 
-            timeSeries.appendData(DataPoint(cycles.toDouble(), response?.responseTime?.toDouble() ?: 0.0), true, 50)
+            timeSeries.appendData(
+                DataPoint(
+                    cycles.toDouble(),
+                    response?.responseTime?.toDouble() ?: 0.0
+                ), true, 50
+            )
         }
     }
 
@@ -154,5 +170,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopSending() {
         sendingJob?.cancel()
+        cameraJob?.cancel()
     }
 }
