@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                 yield()
             }
         }
-        return
+
         cameraJob = GlobalScope.launch(Dispatchers.IO) {
             while (true) {
                 val bitmap = runCatching { sender.getImage() }.getOrNull()
