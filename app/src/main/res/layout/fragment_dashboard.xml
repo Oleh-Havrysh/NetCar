@@ -1,99 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <LinearLayout
-            android:padding="8dp"
-            android:orientation="vertical"
+        android:padding="8dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Light" />
+
+        <com.hakito.netcar.widget.LimitedSeekBar
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:id="@+id/lightSeekBar"
+            android:layout_height="wrap_content"
+            android:max="180" />
+
+        <include layout="@layout/divider" />
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Light"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Steer" />
 
-        <com.hakito.netcar.widget.LimitedSeekBar android:layout_width="match_parent"
-                                                 android:id="@+id/lightSeekBar"
-                                                 android:layout_height="wrap_content"
-                                                 android:max="180"/>
-        <include layout="@layout/divider"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Steer"/>
-
-        <CheckBox android:layout_width="wrap_content"
-                  android:text="Invert steer"
-                  android:layout_height="wrap_content"
-                  android:id="@+id/invertSteerCheckBox"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:text="Invert steer"
+            android:layout_height="wrap_content"
+            android:id="@+id/invertSteerCheckBox" />
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Start"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start" />
 
-        <com.hakito.netcar.widget.LimitedSeekBar android:layout_width="match_parent"
-                                                 android:id="@+id/steerStartSeekBar"
-                                                 android:layout_height="wrap_content"
-                                                 android:max="180"/>
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Center"/>
-
-        <com.hakito.netcar.widget.LimitedSeekBar android:layout_width="match_parent"
-                                                 android:id="@+id/steerCenterSeekBar"
-                                                 android:layout_height="wrap_content"
-                                                 android:max="180"/>
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:layout_width="match_parent"
+            android:id="@+id/steerStartSeekBar"
+            android:layout_height="wrap_content"
+            android:max="180" />
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="End"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Center" />
 
-        <com.hakito.netcar.widget.LimitedSeekBar android:layout_width="match_parent"
-                                                 android:layout_height="wrap_content"
-                                                 android:id="@+id/steerEndSeekBar"
-                                                 android:max="180"/>
-        <include layout="@layout/divider"/>
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Throttle limit"/>
-
-        <com.hakito.netcar.widget.LimitedSeekBar android:layout_width="match_parent"
-                                                 android:id="@+id/throttleLimitSeekBar"
-                                                 android:layout_height="wrap_content"
-                                                 android:max="500"/>
-        <include layout="@layout/divider"/>
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:layout_width="match_parent"
+            android:id="@+id/steerCenterSeekBar"
+            android:layout_height="wrap_content"
+            android:max="180" />
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Voltage multiplier"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="End" />
+
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/steerEndSeekBar"
+            android:max="180" />
+
+        <include layout="@layout/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Throttle limit" />
+
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:layout_width="match_parent"
+            android:id="@+id/throttleLimitSeekBar"
+            android:layout_height="wrap_content"
+            android:max="500" />
+
+        <include layout="@layout/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Voltage multiplier" />
 
         <EditText
-                android:inputType="numberDecimal"
-                android:id="@+id/voltageMultiplierEditText"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"/>
+            android:inputType="numberDecimal"
+            android:id="@+id/voltageMultiplierEditText"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content" />
 
-        <include layout="@layout/divider"/>
+        <include layout="@layout/divider" />
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Request timeout"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Request timeout" />
 
         <EditText
-                android:inputType="number"
-                android:id="@+id/requestTimeoutEditText"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"/>
+            android:inputType="number"
+            android:id="@+id/requestTimeoutEditText"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content" />
+
+        <include layout="@layout/divider" />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:text="Camera enabled"
+            android:layout_height="wrap_content"
+            android:id="@+id/cameraEnabledCheckBox" />
 
     </LinearLayout>
-
 </ScrollView>

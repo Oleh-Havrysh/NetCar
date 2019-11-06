@@ -71,16 +71,14 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
     }
 
     @VisibleForTesting
-    fun buildUrl(params: CarParams): HttpUrl {
-        return HttpUrl.Builder()
-            .scheme("http")
-            .host("192.168.4.1")
-            .port(80)
-            .addPathSegments("car")
-            .addQueryParameter("steer", params.steer.toString())
-            .addQueryParameter("throttle", params.throttle.toString())
-            .build()
-    }
+    fun buildUrl(params: CarParams): HttpUrl = HttpUrl.Builder()
+        .scheme("http")
+        .host("192.168.4.1")
+        .port(80)
+        .addPathSegments("car")
+        .addQueryParameter("steer", params.steer.toString())
+        .addQueryParameter("throttle", params.throttle.toString())
+        .build()
 
 
     companion object {

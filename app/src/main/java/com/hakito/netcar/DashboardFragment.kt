@@ -71,6 +71,14 @@ class DashboardFragment : DialogFragment() {
             onProgressChangedListener = this@DashboardFragment::onSteerEndChanged
         }
 
+
+        dialog.cameraEnabledCheckBox.apply {
+            isChecked = controlPreferences.cameraEnabled
+            setOnCheckedChangeListener { _, isChecked ->
+                controlPreferences.cameraEnabled = isChecked
+            }
+        }
+
         dialog.steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
 
         dialog.steerCenterSeekBar.percentMinLimit = controlPreferences.steerMin

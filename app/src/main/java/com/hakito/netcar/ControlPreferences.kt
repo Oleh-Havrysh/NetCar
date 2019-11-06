@@ -5,7 +5,8 @@ import androidx.core.content.edit
 
 class ControlPreferences(context: Context) {
 
-    private val preferences = context.getSharedPreferences(CONTROL_PREFERENCES, Context.MODE_PRIVATE)
+    private val preferences =
+        context.getSharedPreferences(CONTROL_PREFERENCES, Context.MODE_PRIVATE)
 
     var steerMin: Float
         get() = preferences.getFloat(STEER_MIN, 0f)
@@ -63,6 +64,14 @@ class ControlPreferences(context: Context) {
             }
         }
 
+    var cameraEnabled: Boolean
+        get() = preferences.getBoolean(CAMERA_ENABLED, true)
+        set(value) {
+            preferences.edit {
+                putBoolean(CAMERA_ENABLED, value)
+            }
+        }
+
     companion object {
         private const val CONTROL_PREFERENCES = "CONTROL_PREFERENCES"
         private const val STEER_MIN = "STEER_MIN"
@@ -72,5 +81,6 @@ class ControlPreferences(context: Context) {
         private const val THROTTLE_MAX = "THROTTLE_MAX"
         private const val VOLTAGE_MULTIPLIER = "VOLTAGE_MULTIPLIER"
         private const val REQUEST_TIMEOUT = "REQUEST_TIMEOUT"
+        private const val CAMERA_ENABLED = "CAMERA_ENABLED"
     }
 }
