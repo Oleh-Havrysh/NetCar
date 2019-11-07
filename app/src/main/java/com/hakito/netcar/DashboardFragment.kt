@@ -79,6 +79,13 @@ class DashboardFragment : DialogFragment() {
             }
         }
 
+        dialog.cameraRotationEditText.apply {
+            setText(controlPreferences.cameraRotation.toString())
+            addTextChangedListener {
+                controlPreferences.cameraRotation = text.toString().toIntOrNull() ?: 0
+            }
+        }
+
         dialog.steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
 
         dialog.steerCenterSeekBar.percentMinLimit = controlPreferences.steerMin

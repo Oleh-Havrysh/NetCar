@@ -7,7 +7,10 @@
     tools:context=".MainActivity">
 
     <ImageView
-        android:layout_width="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintDimensionRatio="1"
+        android:layout_width="0dp"
         android:id="@+id/image"
         tools:src="@tools:sample/backgrounds/scenic"
         android:layout_height="match_parent" />
@@ -27,22 +30,6 @@
         android:background="#51000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <de.nitri.gauge.Gauge
-        android:id="@+id/speedometer"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:maxValue="30"
-        app:minValue="0"
-        android:visibility="gone"
-        app:lowerText="km/h"
-        app:totalNicks="40"
-        app:valuePerNick="1" />
 
     <com.hakito.netcar.widget.RelativeTouchView
         android:id="@+id/steerTouchView"

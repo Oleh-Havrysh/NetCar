@@ -44,12 +44,9 @@ class MainActivity : AppCompatActivity() {
 
         initTimeGraph()
 
-        speedometer.apply {
-            setNeedleStepFactor(25f)
-            setDeltaTimeInterval(0)
-        }
-
         sender = CarSenderImpl(controlPreferences)
+
+        image.rotation = controlPreferences.cameraRotation.toFloat()
     }
 
     private fun initTimeGraph() {
@@ -160,7 +157,6 @@ class MainActivity : AppCompatActivity() {
 
         withContext(Dispatchers.Main) {
             speed?.apply {
-                speedometer.moveToValue(toFloat())
                 maxSpeed = max(maxSpeed, this)
             }
             statTextView.text = "max: $maxTime\n" +

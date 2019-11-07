@@ -72,6 +72,14 @@ class ControlPreferences(context: Context) {
             }
         }
 
+    var cameraRotation: Int
+        get() = preferences.getInt(CAMERA_ROTATION, 0)
+        set(value) {
+            preferences.edit {
+                putInt(CAMERA_ROTATION, value)
+            }
+        }
+
     companion object {
         private const val CONTROL_PREFERENCES = "CONTROL_PREFERENCES"
         private const val STEER_MIN = "STEER_MIN"
@@ -82,5 +90,6 @@ class ControlPreferences(context: Context) {
         private const val VOLTAGE_MULTIPLIER = "VOLTAGE_MULTIPLIER"
         private const val REQUEST_TIMEOUT = "REQUEST_TIMEOUT"
         private const val CAMERA_ENABLED = "CAMERA_ENABLED"
+        private const val CAMERA_ROTATION = "CAMERA_ROTATION"
     }
 }

@@ -113,5 +113,16 @@
             android:layout_height="wrap_content"
             android:id="@+id/cameraEnabledCheckBox" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Camera rotation" />
+
+        <EditText
+            android:inputType="number"
+            android:id="@+id/cameraRotationEditText"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content" />
+
     </LinearLayout>
 </ScrollView>
