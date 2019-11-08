@@ -11,7 +11,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.IOException
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,7 +29,9 @@ class MainActivity : AppCompatActivity() {
 
     private var maxSpeed = 0
 
-    private var cameraTimestamps = mutableListOf<Long>()
+    private val cameraCounter = OperationsPerSecondCounter(10)
+
+    private val controlCounter = OperationsPerSecondCounter(50)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,23 +103,14 @@ class MainActivity : AppCompatActivity() {
                     continue
                 }
                 val bitmap = runCatching { sender.getImage() }.getOrNull()
-                    ?.also {
-                        cameraTimestamps.add(System.currentTimeMillis())
-                        while (cameraTimestamps.size > 10) cameraTimestamps.removeAt(0)
-                    }
+                    ?.also { cameraCounter.onPerformed() }
+
                 launch(Dispatchers.Main) {
                     bitmap?.also { image.setImageBitmap(it) }
                 }
             }
         }
     }
-
-    private fun getCameraFps() =
-        cameraTimestamps
-            .windowed(size = 2, step = 2, partialWindows = false) { it[1] - it[0] }
-            .average()
-            .let { 1000 / it }
-            .let { if (it.isNaN()) 0 else it.roundToInt() }
 
     private fun mapSteer(steerValue: Float): Float {
         val range = if (steerValue < 0)
@@ -137,6 +129,7 @@ class MainActivity : AppCompatActivity() {
         val response =
             try {
                 sender.send(CarParams(steerValue, throttleValue))
+                    .also { controlCounter.onPerformed() }
             } catch (e: IOException) {
                 e.printStackTrace()
                 val errorName = e.message!!
@@ -165,7 +158,8 @@ class MainActivity : AppCompatActivity() {
                     "rpm=${response?.rpm}\n" +
                     "speed = $speed kmh\n" +
                     "maxSpeed = $maxSpeed kmh\n" +
-                    "camera FPS = ${getCameraFps()}\n" +
+                    "camera FPS = ${cameraCounter.getRps()}\n" +
+                    "control RPS = ${controlCounter.getRps()}\n" +
                     "$errorsMap\n"
 
             timeSeries.appendData(
