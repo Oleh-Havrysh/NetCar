@@ -33,14 +33,14 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
         val response = client.newCall(request).execute()
 
         if (response.isSuccessful) {
-            val responseString = response.body!!.string()
+            val responseString = response.body()!!.string()
             val voltageRaw = runCatching { parseVoltageRaw(responseString) }.getOrNull() ?: 0f
             val rpm = try {
                 parseRpm(responseString)
             } catch (e: Exception) {
                 0
             }
-            val time = response.receivedResponseAtMillis - response.sentRequestAtMillis
+            val time = response.receivedResponseAtMillis() - response.sentRequestAtMillis()
             return CarResponse(voltageRaw, time, rpm)
         }
 
@@ -56,7 +56,7 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
         val response = client.newCall(request).execute()
 
         if (response.isSuccessful) {
-            return BitmapFactory.decodeStream(response.body!!.byteStream())
+            return BitmapFactory.decodeStream(response.body()!!.byteStream())
         }
         throw IOException("Request failed")
     }
