@@ -106,7 +106,7 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
 
         private fun setupSocket(socket: Socket) {
             socket.keepAlive = true
-            socket.tcpNoDelay = false
+            socket.tcpNoDelay = true
         }
     }
 
