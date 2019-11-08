@@ -9,12 +9,16 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import java.io.IOException
+import java.net.InetAddress
+import java.net.Socket
 import java.util.concurrent.TimeUnit
+import javax.net.SocketFactory
 
 class CarSenderImpl(preferences: ControlPreferences) : CarSender {
 
     private val client = OkHttpClient.Builder()
         .callTimeout(preferences.requestTimeout, TimeUnit.MILLISECONDS)
+        .socketFactory(CustomSocketFactory())
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
@@ -29,14 +33,14 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
         val response = client.newCall(request).execute()
 
         if (response.isSuccessful) {
-            val responseString = response.body()!!.string()
+            val responseString = response.body!!.string()
             val voltageRaw = runCatching { parseVoltageRaw(responseString) }.getOrNull() ?: 0f
             val rpm = try {
                 parseRpm(responseString)
             } catch (e: Exception) {
                 0
             }
-            val time = response.receivedResponseAtMillis() - response.sentRequestAtMillis()
+            val time = response.receivedResponseAtMillis - response.sentRequestAtMillis
             return CarResponse(voltageRaw, time, rpm)
         }
 
@@ -52,7 +56,7 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
         val response = client.newCall(request).execute()
 
         if (response.isSuccessful) {
-            return BitmapFactory.decodeStream(response.body()!!.byteStream())
+            return BitmapFactory.decodeStream(response.body!!.byteStream())
         }
         throw IOException("Request failed")
     }
@@ -80,6 +84,31 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
         .addQueryParameter("throttle", params.throttle.toString())
         .build()
 
+
+    private class CustomSocketFactory : SocketFactory() {
+
+        override fun createSocket() = Socket().also(::setupSocket)
+
+        override fun createSocket(host: String, port: Int) = Socket(host, port).also(::setupSocket)
+
+        override fun createSocket(address: InetAddress, port: Int) =
+            Socket(address, port).also(::setupSocket)
+
+        override fun createSocket(
+            host: String, port: Int,
+            clientAddress: InetAddress, clientPort: Int
+        ) = Socket(host, port, clientAddress, clientPort).also(::setupSocket)
+
+        override fun createSocket(
+            address: InetAddress, port: Int,
+            clientAddress: InetAddress, clientPort: Int
+        ) = Socket(address, port, clientAddress, clientPort).also(::setupSocket)
+
+        private fun setupSocket(socket: Socket) {
+            socket.keepAlive = true
+            socket.tcpNoDelay = false
+        }
+    }
 
     companion object {
         private const val VOLTAGE_RAW_MAX = 1023

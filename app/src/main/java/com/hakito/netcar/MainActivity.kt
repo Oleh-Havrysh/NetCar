@@ -1,7 +1,6 @@
 package com.hakito.netcar
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarSender
 import com.hakito.netcar.sender.CarSenderImpl
@@ -12,7 +11,7 @@ import kotlinx.coroutines.*
 import java.io.IOException
 import kotlin.math.max
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private var sendingJob: Job? = null
 
@@ -33,10 +32,10 @@ class MainActivity : AppCompatActivity() {
 
     private val controlCounter = OperationsPerSecondCounter(50)
 
+    override val layoutRes = R.layout.activity_main
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
         controlPreferences = ControlPreferences(this)
 
         dashboardButton.setOnClickListener {
@@ -78,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     var cameraJob: Job? = null
 
     private fun startSending() {
-        sendingJob = GlobalScope.launch(Dispatchers.IO) {
+        sendingJob = launch(Dispatchers.IO) {
             while (true) {
                 try {
                     val throttle =
@@ -96,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        cameraJob = GlobalScope.launch(Dispatchers.IO) {
+        cameraJob = launch(Dispatchers.IO) {
             while (true) {
                 if (!controlPreferences.cameraEnabled) {
                     delay(1000)
