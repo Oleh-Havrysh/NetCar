@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.IOException
 import kotlin.math.max
+import kotlin.math.sign
 
 class MainActivity : BaseActivity() {
 
@@ -83,6 +84,7 @@ class MainActivity : BaseActivity() {
                     val throttle =
                         throttleTouchView.progress?.y
                             ?.times(controlPreferences.throttleMax * ServoConstants.AMPLITUDE)
+                            ?.let { it + it.sign * ServoConstants.AMPLITUDE * controlPreferences.throttleDeadzone }
                             ?.plus(ServoConstants.CENTER)
                     val steer = steerTouchView.progress?.x
                         ?.times(if (controlPreferences.invertSteer) -1 else 1)

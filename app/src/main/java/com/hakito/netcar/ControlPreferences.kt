@@ -80,6 +80,14 @@ class ControlPreferences(context: Context) {
             }
         }
 
+    var throttleDeadzone: Float
+        get() = preferences.getFloat(THROTTLE_DEADZONE, 0f)
+        set(value) {
+            preferences.edit {
+                putFloat(THROTTLE_DEADZONE, value)
+            }
+        }
+
     companion object {
         private const val CONTROL_PREFERENCES = "CONTROL_PREFERENCES"
         private const val STEER_MIN = "STEER_MIN"
@@ -91,5 +99,6 @@ class ControlPreferences(context: Context) {
         private const val REQUEST_TIMEOUT = "REQUEST_TIMEOUT"
         private const val CAMERA_ENABLED = "CAMERA_ENABLED"
         private const val CAMERA_ROTATION = "CAMERA_ROTATION"
+        private const val THROTTLE_DEADZONE = "THROTTLE_DEADZONE"
     }
 }

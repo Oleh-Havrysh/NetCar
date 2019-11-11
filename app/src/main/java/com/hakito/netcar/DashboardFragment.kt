@@ -86,6 +86,11 @@ class DashboardFragment : DialogFragment() {
             }
         }
 
+        dialog!!.throttleDeadzoneCompensationSeekBar.apply {
+            percentProgress = controlPreferences.throttleDeadzone
+            onProgressChangedListener = this@DashboardFragment::onThrottleDeadzoneChanged
+        }
+
         dialog!!.steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
 
         dialog!!.steerCenterSeekBar.percentMinLimit = controlPreferences.steerMin
@@ -108,5 +113,9 @@ class DashboardFragment : DialogFragment() {
     private fun onSteerEndChanged(value: Float) {
         dialog!!.steerCenterSeekBar.percentMaxLimit = value
         controlPreferences.steerMax = value
+    }
+
+    private fun onThrottleDeadzoneChanged(value: Float) {
+        controlPreferences.throttleDeadzone = value
     }
 }
