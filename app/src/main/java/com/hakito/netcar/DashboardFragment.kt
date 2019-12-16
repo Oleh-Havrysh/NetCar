@@ -97,6 +97,22 @@ class DashboardFragment : DialogFragment() {
         dialog!!.steerCenterSeekBar.percentMaxLimit = controlPreferences.steerMax
 
         dialog!!.steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
+
+        var fromUser = true
+        dialog!!.stabilizationEnabledCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            if (!fromUser) return@setOnCheckedChangeListener
+            AlertDialog.Builder(context!!)
+                .setTitle("Stabilization")
+                .setMessage("Are you sure want to ${if (isChecked) "enable" else "disable"} stabilization?")
+                .setPositiveButton("Yes") { _, _ -> }
+                .setNegativeButton("No") { _, _ ->
+                    fromUser = false
+                    dialog!!.stabilizationEnabledCheckBox.isChecked = !isChecked
+                    fromUser = true
+                }
+                .create()
+                .show()
+        }
     }
 
     private fun onSteerStartChanged(value: Float) {

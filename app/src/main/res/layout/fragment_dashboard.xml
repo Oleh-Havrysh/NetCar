@@ -82,11 +82,30 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Throttle dedzone compensation" />
+            android:text="Throttle deadzone compensation" />
 
         <com.hakito.netcar.widget.LimitedSeekBar
             android:layout_width="match_parent"
             android:id="@+id/throttleDeadzoneCompensationSeekBar"
+            android:layout_height="wrap_content"
+            android:max="500" />
+
+        <include layout="@layout/divider" />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:text="Stabilization enabled"
+            android:layout_height="wrap_content"
+            android:id="@+id/stabilizationEnabledCheckBox" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stabilization gain" />
+
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:layout_width="match_parent"
+            android:id="@+id/stabilizationGainSeekBar"
             android:layout_height="wrap_content"
             android:max="500" />
 

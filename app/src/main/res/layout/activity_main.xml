@@ -13,7 +13,8 @@
         android:layout_width="0dp"
         android:id="@+id/image"
         tools:src="@tools:sample/backgrounds/scenic"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/statTextView"
@@ -60,6 +61,7 @@
         android:padding="8dp"
         android:src="@android:drawable/ic_menu_preferences"
         app:layout_constraintEnd_toStartOf="@id/timeGraph"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
