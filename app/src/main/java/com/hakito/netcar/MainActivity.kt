@@ -24,6 +24,7 @@ class MainActivity : BaseActivity() {
     private var maxTime = 0L
 
     private val timeSeries = LineGraphSeries<DataPoint>()
+    private val rpmSeries = LineGraphSeries<DataPoint>()
 
     private val errorsMap = mutableMapOf<String, Int>()
 
@@ -44,10 +45,30 @@ class MainActivity : BaseActivity() {
         }
 
         initTimeGraph()
+        initRpmGraph()
 
         sender = CarSenderImpl(controlPreferences)
 
         image.rotation = controlPreferences.cameraRotation.toFloat()
+
+        launch {
+            var rpmCycles = 0
+            while (true) {
+                val sensors =
+                    runCatching {
+                        withContext(Dispatchers.IO) { sender.getSensors() }
+                    }.getOrNull()
+                        ?: continue
+                rpmSeries.appendData(
+                    DataPoint(
+                        rpmCycles.toDouble(),
+                        sensors.rearRpm.toDouble()
+                    ), true, 50
+                )
+                rpmCycles++
+                delay(200)
+            }
+        }
     }
 
     private fun initTimeGraph() {
@@ -61,6 +82,21 @@ class MainActivity : BaseActivity() {
                 isYAxisBoundsManual = true
                 setMinY(0.0)
                 setMaxY(controlPreferences.requestTimeout.toDouble())
+            }
+        }
+    }
+
+    private fun initRpmGraph() {
+        rpmGraph.apply {
+            addSeries(rpmSeries)
+            gridLabelRenderer.isHorizontalLabelsVisible = false
+            viewport.apply {
+                isXAxisBoundsManual = true
+                setMinX(0.0)
+                setMaxX(50.0)
+                isYAxisBoundsManual = true
+                setMinY(0.0)
+                setMaxY(100.0)
             }
         }
     }
@@ -127,6 +163,7 @@ class MainActivity : BaseActivity() {
         val steerValue = steer?.toInt() ?: controlPreferences.steerCenter.toServoValue().toInt()
         val throttleValue = throttle?.toInt() ?: ServoConstants.CENTER
 
+        return
         val response =
             try {
                 sender.send(CarParams(steerValue, throttleValue))

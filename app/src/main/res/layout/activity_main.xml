@@ -53,6 +53,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/rpmGraph"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
     <ImageButton
         android:id="@+id/dashboardButton"
         android:layout_width="wrap_content"

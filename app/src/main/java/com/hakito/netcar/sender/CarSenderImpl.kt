@@ -3,6 +3,7 @@ package com.hakito.netcar.sender
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.VisibleForTesting
+import com.google.gson.Gson
 import com.hakito.netcar.ControlPreferences
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -18,7 +19,7 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
 
     private val client = OkHttpClient.Builder()
         .callTimeout(preferences.requestTimeout, TimeUnit.MILLISECONDS)
-        .socketFactory(CustomSocketFactory())
+        //.socketFactory(CustomSocketFactory())
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
@@ -44,6 +45,20 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
             return CarResponse(voltageRaw, time, rpm)
         }
 
+        throw IOException("Request failed")
+    }
+
+    override suspend fun getSensors(): Sensors {
+        val request = Request.Builder()
+            .url("http://192.168.4.1/sensors")
+            .get()
+            .build()
+
+        val response = client.newCall(request).execute()
+
+        if (response.isSuccessful) {
+            return Gson().fromJson(response.body()!!.string(), Sensors::class.java)
+        }
         throw IOException("Request failed")
     }
 
