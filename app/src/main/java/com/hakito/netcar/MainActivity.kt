@@ -28,7 +28,7 @@ class MainActivity : BaseActivity() {
 
     private lateinit var controlPreferences: ControlPreferences
 
-    private var cycles = 0
+    private var graphStartTime = System.currentTimeMillis()
     private var maxTime = 0L
 
     private val timeSeries = LineGraphSeries<DataPoint>()
@@ -96,6 +96,8 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private fun getGraphTime() = (System.currentTimeMillis() - graphStartTime) / 1000.0
+
     private fun initTimeGraph() {
         timeGraph.apply {
             addSeries(timeSeries)
@@ -103,7 +105,7 @@ class MainActivity : BaseActivity() {
             viewport.apply {
                 isXAxisBoundsManual = true
                 setMinX(0.0)
-                setMaxX(50.0)
+                setMaxX(1.0)
                 isYAxisBoundsManual = true
                 setMinY(0.0)
                 setMaxY(controlPreferences.requestTimeout.toDouble())
@@ -121,10 +123,10 @@ class MainActivity : BaseActivity() {
             viewport.apply {
                 isXAxisBoundsManual = true
                 setMinX(0.0)
-                setMaxX(50.0)
+                setMaxX(1.0)
                 isYAxisBoundsManual = true
                 setMinY(0.0)
-                setMaxY(3000.0)
+                setMaxY(2500.0)
             }
         }
     }
@@ -191,8 +193,6 @@ class MainActivity : BaseActivity() {
     }
 
     private suspend fun sendValue(steer: Float?, throttle: Int) {
-        cycles++
-
         val steerValue = steer?.toInt() ?: controlPreferences.steerCenter.toServoValue().toInt()
         lastSteerValue = steerValue
         lastThrottleValue = throttle
@@ -235,26 +235,26 @@ class MainActivity : BaseActivity() {
 
         timeSeries.appendData(
             DataPoint(
-                cycles.toDouble(),
+                getGraphTime(),
                 response?.responseTime?.toDouble() ?: 0.0
             ), true, 50
         )
         if (response != null) {
             rpmFrontLeftSeries.appendData(
                 DataPoint(
-                    cycles.toDouble(),
+                    getGraphTime(),
                     response.sensors.frontLeftRpm.toDouble()
                 ), true, 50
             )
             rpmFrontRightSeries.appendData(
                 DataPoint(
-                    cycles.toDouble(),
+                    getGraphTime(),
                     response.sensors.frontRightRpm.toDouble()
                 ), true, 50
             )
             rpmRearSeries.appendData(
                 DataPoint(
-                    cycles.toDouble(),
+                    getGraphTime(),
                     response.sensors.rearRpm.toDouble()
                 ), true, 50
             )
