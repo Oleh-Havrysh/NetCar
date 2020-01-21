@@ -2,103 +2,65 @@ package com.hakito.netcar
 
 import android.content.Context
 import androidx.core.content.edit
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 class ControlPreferences(context: Context) {
 
     private val preferences =
-        context.getSharedPreferences(CONTROL_PREFERENCES, Context.MODE_PRIVATE)
+        context.getSharedPreferences("CONTROL_PREFERENCES", Context.MODE_PRIVATE)
 
-    var steerMin: Float
-        get() = preferences.getFloat(STEER_MIN, 0f)
-        set(value) {
-            preferences.edit {
-                putFloat(STEER_MIN, value)
-            }
-        }
+    var steerMin by FloatDelegate("STEER_MIN")
 
-    var steerCenter: Float
-        get() = preferences.getFloat(STEER_CENTER, 0.5f)
-        set(value) {
-            preferences.edit {
-                putFloat(STEER_CENTER, value)
-            }
-        }
+    var steerCenter by FloatDelegate("STEER_CENTER", 0.5f)
 
-    var steerMax: Float
-        get() = preferences.getFloat(STEER_MAX, 1f)
-        set(value) {
-            preferences.edit {
-                putFloat(STEER_MAX, value)
-            }
-        }
+    var steerMax by FloatDelegate("STEER_MAX", 1f)
 
-    var invertSteer: Boolean
-        get() = preferences.getBoolean(INVERT_STEER, false)
-        set(value) {
-            preferences.edit {
-                putBoolean(INVERT_STEER, value)
-            }
-        }
+    var invertSteer by BooleanDelegate("INVERT_STEER")
 
-    var throttleMax: Float
-        get() = preferences.getFloat(THROTTLE_MAX, 0.5f)
-        set(value) {
-            preferences.edit {
-                putFloat(THROTTLE_MAX, value)
-            }
-        }
+    var throttleMax by FloatDelegate("THROTTLE_MAX", 1f)
 
-    var voltageMultiplier: Float
-        get() = preferences.getFloat(VOLTAGE_MULTIPLIER, 1f)
-        set(value) {
-            preferences.edit {
-                putFloat(VOLTAGE_MULTIPLIER, value)
-            }
-        }
+    var voltageMultiplier by FloatDelegate("VOLTAGE_MULTIPLIER", 1f)
 
-    var requestTimeout: Long
-        get() = preferences.getLong(REQUEST_TIMEOUT, 500)
-        set(value) {
-            preferences.edit {
-                putLong(REQUEST_TIMEOUT, value)
-            }
-        }
+    var requestTimeout by IntDelegate("REQUEST_TIMEOUT", 500)
 
-    var cameraEnabled: Boolean
-        get() = preferences.getBoolean(CAMERA_ENABLED, true)
-        set(value) {
-            preferences.edit {
-                putBoolean(CAMERA_ENABLED, value)
-            }
-        }
+    var cameraEnabled by BooleanDelegate("CAMERA_ENABLED")
 
-    var cameraRotation: Int
-        get() = preferences.getInt(CAMERA_ROTATION, 0)
-        set(value) {
-            preferences.edit {
-                putInt(CAMERA_ROTATION, value)
-            }
-        }
+    var cameraRotation by IntDelegate("CAMERA_ROTATION")
 
-    var throttleDeadzone: Float
-        get() = preferences.getFloat(THROTTLE_DEADZONE, 0f)
-        set(value) {
-            preferences.edit {
-                putFloat(THROTTLE_DEADZONE, value)
-            }
-        }
+    var throttleDeadzone by FloatDelegate("THROTTLE_DEADZONE")
 
-    companion object {
-        private const val CONTROL_PREFERENCES = "CONTROL_PREFERENCES"
-        private const val STEER_MIN = "STEER_MIN"
-        private const val STEER_CENTER = "STEER_CENTER"
-        private const val STEER_MAX = "STEER_MAX"
-        private const val INVERT_STEER = "INVERT_STEER"
-        private const val THROTTLE_MAX = "THROTTLE_MAX"
-        private const val VOLTAGE_MULTIPLIER = "VOLTAGE_MULTIPLIER"
-        private const val REQUEST_TIMEOUT = "REQUEST_TIMEOUT"
-        private const val CAMERA_ENABLED = "CAMERA_ENABLED"
-        private const val CAMERA_ROTATION = "CAMERA_ROTATION"
-        private const val THROTTLE_DEADZONE = "THROTTLE_DEADZONE"
+    var cruiseGain by FloatDelegate("CRUISE_GAIN")
+
+    var preventSlipping by BooleanDelegate("PREVENT_SLIPPING")
+
+    inner class FloatDelegate(private val key: String, private val default: Float = 0f) :
+        ReadWriteProperty<ControlPreferences, Float> {
+
+        override fun getValue(thisRef: ControlPreferences, property: KProperty<*>) =
+            preferences.getFloat(key, default)
+
+        override fun setValue(thisRef: ControlPreferences, property: KProperty<*>, value: Float) =
+            preferences.edit { putFloat(key, value) }
+    }
+
+    inner class BooleanDelegate(private val key: String, private val default: Boolean = false) :
+        ReadWriteProperty<ControlPreferences, Boolean> {
+
+        override fun getValue(thisRef: ControlPreferences, property: KProperty<*>) =
+            preferences.getBoolean(key, default)
+
+        override fun setValue(thisRef: ControlPreferences, property: KProperty<*>, value: Boolean) =
+            preferences.edit { putBoolean(key, value) }
+    }
+
+    inner class IntDelegate(private val key: String, private val default: Int = 0) :
+        ReadWriteProperty<ControlPreferences, Int> {
+
+        override fun getValue(thisRef: ControlPreferences, property: KProperty<*>) =
+            preferences.getInt(key, default)
+
+        override fun setValue(thisRef: ControlPreferences, property: KProperty<*>, value: Int) =
+            preferences.edit { putInt(key, value) }
     }
 }

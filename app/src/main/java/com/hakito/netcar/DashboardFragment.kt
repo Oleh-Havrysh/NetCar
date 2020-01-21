@@ -38,7 +38,7 @@ class DashboardFragment : DialogFragment() {
         dialog!!.requestTimeoutEditText.apply {
             setText(controlPreferences.requestTimeout.toString())
             addTextChangedListener {
-                controlPreferences.requestTimeout = text.toString().toLongOrNull() ?: 100L
+                controlPreferences.requestTimeout = text.toString().toIntOrNull() ?: 100
             }
         }
 
@@ -58,17 +58,17 @@ class DashboardFragment : DialogFragment() {
 
         dialog!!.steerStartSeekBar.apply {
             percentProgress = controlPreferences.steerMin
-            onProgressChangedListener = this@DashboardFragment::onSteerStartChanged
+            onProgressChangedListener = ::onSteerStartChanged
         }
 
         dialog!!.steerCenterSeekBar.apply {
             percentProgress = controlPreferences.steerCenter
-            onProgressChangedListener = this@DashboardFragment::onSteerCenterChanged
+            onProgressChangedListener = ::onSteerCenterChanged
         }
 
         dialog!!.steerEndSeekBar.apply {
             percentProgress = controlPreferences.steerMax
-            onProgressChangedListener = this@DashboardFragment::onSteerEndChanged
+            onProgressChangedListener = ::onSteerEndChanged
         }
 
 
@@ -88,7 +88,19 @@ class DashboardFragment : DialogFragment() {
 
         dialog!!.throttleDeadzoneCompensationSeekBar.apply {
             percentProgress = controlPreferences.throttleDeadzone
-            onProgressChangedListener = this@DashboardFragment::onThrottleDeadzoneChanged
+            onProgressChangedListener = ::onThrottleDeadzoneChanged
+        }
+
+        dialog!!.cruiseGainSeekBar.apply {
+            percentProgress = controlPreferences.cruiseGain
+            onProgressChangedListener = ::onCruiseGainChanged
+        }
+
+        dialog!!.preventSlippingCheckBox.apply {
+            isChecked = controlPreferences.preventSlipping
+            setOnCheckedChangeListener { _, isChecked ->
+                controlPreferences.preventSlipping = isChecked
+            }
         }
 
         dialog!!.steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
@@ -97,22 +109,10 @@ class DashboardFragment : DialogFragment() {
         dialog!!.steerCenterSeekBar.percentMaxLimit = controlPreferences.steerMax
 
         dialog!!.steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
+    }
 
-        var fromUser = true
-        dialog!!.stabilizationEnabledCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            if (!fromUser) return@setOnCheckedChangeListener
-            AlertDialog.Builder(context!!)
-                .setTitle("Stabilization")
-                .setMessage("Are you sure want to ${if (isChecked) "enable" else "disable"} stabilization?")
-                .setPositiveButton("Yes") { _, _ -> }
-                .setNegativeButton("No") { _, _ ->
-                    fromUser = false
-                    dialog!!.stabilizationEnabledCheckBox.isChecked = !isChecked
-                    fromUser = true
-                }
-                .create()
-                .show()
-        }
+    private fun onCruiseGainChanged(value: Float) {
+        controlPreferences.cruiseGain = value
     }
 
     private fun onSteerStartChanged(value: Float) {

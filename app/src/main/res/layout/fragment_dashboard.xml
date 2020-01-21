@@ -4,10 +4,10 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
-        android:padding="8dp"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -15,8 +15,8 @@
             android:text="Light" />
 
         <com.hakito.netcar.widget.LimitedSeekBar
-            android:layout_width="match_parent"
             android:id="@+id/lightSeekBar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="180" />
 
@@ -28,10 +28,10 @@
             android:text="Steer" />
 
         <CheckBox
+            android:id="@+id/invertSteerCheckBox"
             android:layout_width="wrap_content"
-            android:text="Invert steer"
             android:layout_height="wrap_content"
-            android:id="@+id/invertSteerCheckBox" />
+            android:text="Invert steer" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -39,8 +39,8 @@
             android:text="Start" />
 
         <com.hakito.netcar.widget.LimitedSeekBar
-            android:layout_width="match_parent"
             android:id="@+id/steerStartSeekBar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="180" />
 
@@ -50,8 +50,8 @@
             android:text="Center" />
 
         <com.hakito.netcar.widget.LimitedSeekBar
-            android:layout_width="match_parent"
             android:id="@+id/steerCenterSeekBar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="180" />
 
@@ -61,9 +61,9 @@
             android:text="End" />
 
         <com.hakito.netcar.widget.LimitedSeekBar
+            android:id="@+id/steerEndSeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/steerEndSeekBar"
             android:max="180" />
 
         <include layout="@layout/divider" />
@@ -74,8 +74,8 @@
             android:text="Throttle limit" />
 
         <com.hakito.netcar.widget.LimitedSeekBar
-            android:layout_width="match_parent"
             android:id="@+id/throttleLimitSeekBar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="500" />
 
@@ -85,27 +85,8 @@
             android:text="Throttle deadzone compensation" />
 
         <com.hakito.netcar.widget.LimitedSeekBar
-            android:layout_width="match_parent"
             android:id="@+id/throttleDeadzoneCompensationSeekBar"
-            android:layout_height="wrap_content"
-            android:max="500" />
-
-        <include layout="@layout/divider" />
-
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:text="Stabilization enabled"
-            android:layout_height="wrap_content"
-            android:id="@+id/stabilizationEnabledCheckBox" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stabilization gain" />
-
-        <com.hakito.netcar.widget.LimitedSeekBar
             android:layout_width="match_parent"
-            android:id="@+id/stabilizationGainSeekBar"
             android:layout_height="wrap_content"
             android:max="500" />
 
@@ -117,10 +98,10 @@
             android:text="Voltage multiplier" />
 
         <EditText
-            android:inputType="numberDecimal"
             android:id="@+id/voltageMultiplierEditText"
             android:layout_width="150dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal" />
 
         <include layout="@layout/divider" />
 
@@ -130,18 +111,18 @@
             android:text="Request timeout" />
 
         <EditText
-            android:inputType="number"
             android:id="@+id/requestTimeoutEditText"
             android:layout_width="150dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number" />
 
         <include layout="@layout/divider" />
 
         <CheckBox
+            android:id="@+id/cameraEnabledCheckBox"
             android:layout_width="wrap_content"
-            android:text="Camera enabled"
             android:layout_height="wrap_content"
-            android:id="@+id/cameraEnabledCheckBox" />
+            android:text="Camera enabled" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -149,10 +130,29 @@
             android:text="Camera rotation" />
 
         <EditText
-            android:inputType="number"
             android:id="@+id/cameraRotationEditText"
             android:layout_width="150dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+
+        <include layout="@layout/divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cruise gain" />
+
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:id="@+id/cruiseGainSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="500" />
+
+        <CheckBox
+            android:id="@+id/preventSlippingCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Prevent slipping" />
 
     </LinearLayout>
 </ScrollView>

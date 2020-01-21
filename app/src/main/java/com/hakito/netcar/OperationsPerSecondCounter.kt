@@ -13,6 +13,7 @@ class OperationsPerSecondCounter(private val probeSize: Int) {
 
     fun getRps() =
         timestamps
+            .toList()
             .windowed(size = 2, step = 2, partialWindows = false) { it[1] - it[0] }
             .average()
             .let { 1000 / it }
