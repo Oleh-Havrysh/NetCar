@@ -155,7 +155,7 @@ class MainActivity : BaseActivity() {
                             .times(controlPreferences.throttleMax)
                             .let(stabilizationController::calcThrottle)
                             .times(ServoConstants.AMPLITUDE)
-                            .let { it + it.sign * ServoConstants.AMPLITUDE * controlPreferences.throttleDeadzone }
+                            .let { it + it.sign * ServoConstants.AMPLITUDE * controlPreferences.throttleDeadzoneCompensation }
                             .plus(ServoConstants.CENTER)
                             .toInt()
                     val steer = steerTouchView.progress?.x

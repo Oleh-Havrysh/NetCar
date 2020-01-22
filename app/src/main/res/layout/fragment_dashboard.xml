@@ -154,5 +154,22 @@
             android:layout_height="wrap_content"
             android:text="Prevent slipping" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cruise speed diff" />
+
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:id="@+id/cruiseSpeedDiffSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="500" />
+
+        <CheckBox
+            android:id="@+id/cruiseDiffDependsOnThrottleCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cruise diff depends on throttle" />
+
     </LinearLayout>
 </ScrollView>

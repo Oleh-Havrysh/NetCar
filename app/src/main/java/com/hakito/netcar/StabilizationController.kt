@@ -48,24 +48,34 @@ class StabilizationController(private val preferences: ControlPreferences) {
 
     fun calcThrottle(userThrottle: Float) =
         when {
+            userThrottle < 0 -> userThrottle
             !isSensorsCalibrated -> userThrottle
             isCruiseEnabled() -> {
                 val targetRpm = if (preferences.preventSlipping)
-                    targetCruiseRpm.constraint(0, sensors.frontLeftRpm + FRONT_WHEEL_DIFF)
+                    targetCruiseRpm.constraint(0, sensors.frontLeftRpm + getMaxFrontRearSpeedDiff())
                 else targetCruiseRpm
                 adjustAndGetCruiseThrottle(targetRpm, preferences.throttleMax)
             }
             preferences.preventSlipping -> {
-                adjustAndGetCruiseThrottle(sensors.frontLeftRpm + FRONT_WHEEL_DIFF, userThrottle)
+                adjustAndGetCruiseThrottle(
+                    sensors.frontLeftRpm + getMaxFrontRearSpeedDiffWithTrottle(userThrottle),
+                    userThrottle
+                )
             }
             else -> userThrottle
         }
+
+    private fun getMaxFrontRearSpeedDiff() = (preferences.cruiseSpeedDiff * 1000).toInt()
+
+    private fun getMaxFrontRearSpeedDiffWithTrottle(throttle: Float) =
+        if (preferences.cruiseDiffDependsOnThrottle) (getMaxFrontRearSpeedDiff() * throttle).toInt()
+        else getMaxFrontRearSpeedDiff()
 
     private fun adjustAndGetCruiseThrottle(targetRpm: Int, maxThrottle: Float): Float {
         val rpmDiff = ((targetRpm - sensors.rearRpm) / 2000f)
             .constraint(-1f, 1f)
         return (cruiseThrottle + rpmDiff * preferences.cruiseGain * getAndSetDeltaTimeSeconds())
-            .constraint(min(maxThrottle, preferences.throttleDeadzone), maxThrottle)
+            .constraint(min(maxThrottle, preferences.throttleDeadzoneCompensation), maxThrottle)
             .also { cruiseThrottle = it }
     }
 
@@ -80,9 +90,5 @@ class StabilizationController(private val preferences: ControlPreferences) {
         val delta = min(current - lastStabilizationTime, 100)
         lastStabilizationTime = current
         return delta / 1000f
-    }
-
-    companion object {
-        private const val FRONT_WHEEL_DIFF = 100
     }
 }
