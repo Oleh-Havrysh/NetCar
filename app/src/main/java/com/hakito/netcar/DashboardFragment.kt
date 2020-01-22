@@ -45,7 +45,7 @@ class DashboardFragment : DialogFragment() {
             }
         }
 
-        dialog!!.invertSteerCheckBox.bindBoolean(controlPreferences::invertSteer)
+        dialog!!.invertSteerCheckBox.bindToBoolean(controlPreferences::invertSteer)
 
         dialog!!.throttleLimitSeekBar.bindToFloat(controlPreferences::throttleMax)
 
@@ -64,7 +64,7 @@ class DashboardFragment : DialogFragment() {
             onProgressChangedListener = ::onSteerEndChanged
         }
 
-        dialog!!.cameraEnabledCheckBox.bindBoolean(controlPreferences::cameraEnabled)
+        dialog!!.cameraEnabledCheckBox.bindToBoolean(controlPreferences::cameraEnabled)
 
         dialog!!.cameraRotationEditText.apply {
             setText(controlPreferences.cameraRotation.toString())
@@ -77,11 +77,13 @@ class DashboardFragment : DialogFragment() {
 
         dialog!!.cruiseGainSeekBar.bindToFloat(controlPreferences::cruiseGain)
 
-        dialog!!.preventSlippingCheckBox.bindBoolean(controlPreferences::preventSlipping)
+        dialog!!.preventSlippingCheckBox.bindToBoolean(controlPreferences::preventSlipping)
 
-        dialog!!.cruiseDiffDependsOnThrottleCheckBox.bindBoolean(controlPreferences::cruiseDiffDependsOnThrottle)
+        dialog!!.cruiseDiffDependsOnThrottleCheckBox.bindToBoolean(controlPreferences::cruiseDiffDependsOnThrottle)
 
         dialog!!.cruiseSpeedDiffSeekBar.bindToFloat(controlPreferences::cruiseSpeedDiff)
+
+        dialog!!.speedDependantSteerLimitSeekBar.bindToFloat(controlPreferences::speedDependantSteerLimit)
 
         dialog!!.steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
 
@@ -91,7 +93,7 @@ class DashboardFragment : DialogFragment() {
         dialog!!.steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
     }
 
-    private fun CheckBox.bindBoolean(property: KMutableProperty<Boolean>) {
+    private fun CheckBox.bindToBoolean(property: KMutableProperty<Boolean>) {
         isChecked = property.getter.call()
         setOnCheckedChangeListener { _, isChecked -> property.setter.call(isChecked) }
     }

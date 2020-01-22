@@ -171,5 +171,16 @@
             android:layout_height="wrap_content"
             android:text="Cruise diff depends on throttle" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2k RPM steer limit" />
+
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:id="@+id/speedDependantSteerLimitSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="500" />
+
     </LinearLayout>
 </ScrollView>

@@ -159,6 +159,7 @@ class MainActivity : BaseActivity() {
                             .plus(ServoConstants.CENTER)
                             .toInt()
                     val steer = steerTouchView.progress?.x
+                        ?.let(stabilizationController::calcSteer)
                         ?.times(if (controlPreferences.invertSteer) -1 else 1)
                         ?.run { mapSteer(this) }
                     sendValue(steer, throttle)
@@ -226,13 +227,11 @@ class MainActivity : BaseActivity() {
         speed?.apply { maxSpeed = max(maxSpeed, this) }
         statTextView.text =
             """
-max: $maxTime
 steer: $lastSteerValue, throttle: $lastThrottleValue
 speed = $speed kmh
 maxSpeed = $maxSpeed kmh
 control RPS = ${controlCounter.getRps()}
-$errorsMap
-${response?.sensors}"""
+$errorsMap"""
 
         timeSeries.appendData(
             DataPoint(

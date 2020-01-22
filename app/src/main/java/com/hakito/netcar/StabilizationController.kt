@@ -72,7 +72,7 @@ class StabilizationController(private val preferences: ControlPreferences) {
         else getMaxFrontRearSpeedDiff()
 
     private fun adjustAndGetCruiseThrottle(targetRpm: Int, maxThrottle: Float): Float {
-        val rpmDiff = ((targetRpm - sensors.rearRpm) / 2000f)
+        val rpmDiff = ((targetRpm - sensors.rearRpm) / 1000f)
             .constraint(-1f, 1f)
         return (cruiseThrottle + rpmDiff * preferences.cruiseGain * getAndSetDeltaTimeSeconds())
             .constraint(min(maxThrottle, preferences.throttleDeadzoneCompensation), maxThrottle)
@@ -84,6 +84,14 @@ class StabilizationController(private val preferences: ControlPreferences) {
 
     private fun Int.constraint(minConstraint: Int, maxConstraint: Int) =
         max(minConstraint, min(maxConstraint, this))
+
+    private fun Float.interpolateProgress(minValue: Float, maxValue: Float) =
+        minValue + this * (maxValue - minValue)
+
+    fun calcSteer(userSteer: Float): Float {
+        val relativeRpm = (sensors.frontLeftRpm / 2000f).constraint(0f, 1f)
+        return userSteer * relativeRpm.interpolateProgress(1f, preferences.speedDependantSteerLimit)
+    }
 
     private fun getAndSetDeltaTimeSeconds(): Float {
         val current = System.currentTimeMillis()

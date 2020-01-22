@@ -38,6 +38,8 @@ class ControlPreferences(context: Context) {
 
     var cruiseDiffDependsOnThrottle by BooleanDelegate("CRUISE_DIFF_DEPENDS_ON_THROTTLE")
 
+    var speedDependantSteerLimit by FloatDelegate("SPEED_DEPENDANT_STEER_LIMIT", 1f)
+
     inner class FloatDelegate(private val key: String, private val default: Float = 0f) :
         ReadWriteProperty<ControlPreferences, Float> {
 
