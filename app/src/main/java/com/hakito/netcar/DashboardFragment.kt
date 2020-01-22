@@ -2,10 +2,13 @@ package com.hakito.netcar
 
 import android.app.Dialog
 import android.os.Bundle
+import android.widget.CheckBox
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
+import com.hakito.netcar.widget.LimitedSeekBar
 import kotlinx.android.synthetic.main.fragment_dashboard.*
+import kotlin.reflect.KMutableProperty
 
 class DashboardFragment : DialogFragment() {
 
@@ -42,19 +45,9 @@ class DashboardFragment : DialogFragment() {
             }
         }
 
-        dialog!!.invertSteerCheckBox.apply {
-            isChecked = controlPreferences.invertSteer
-            setOnCheckedChangeListener { _, isChecked ->
-                controlPreferences.invertSteer = isChecked
-            }
-        }
+        dialog!!.invertSteerCheckBox.bindBoolean(controlPreferences::invertSteer)
 
-        dialog!!.throttleLimitSeekBar.apply {
-            percentProgress = controlPreferences.throttleMax
-            onProgressChangedListener = {
-                controlPreferences.throttleMax = it
-            }
-        }
+        dialog!!.throttleLimitSeekBar.bindToFloat(controlPreferences::throttleMax)
 
         dialog!!.steerStartSeekBar.apply {
             percentProgress = controlPreferences.steerMin
@@ -71,13 +64,7 @@ class DashboardFragment : DialogFragment() {
             onProgressChangedListener = ::onSteerEndChanged
         }
 
-
-        dialog!!.cameraEnabledCheckBox.apply {
-            isChecked = controlPreferences.cameraEnabled
-            setOnCheckedChangeListener { _, isChecked ->
-                controlPreferences.cameraEnabled = isChecked
-            }
-        }
+        dialog!!.cameraEnabledCheckBox.bindBoolean(controlPreferences::cameraEnabled)
 
         dialog!!.cameraRotationEditText.apply {
             setText(controlPreferences.cameraRotation.toString())
@@ -86,22 +73,15 @@ class DashboardFragment : DialogFragment() {
             }
         }
 
-        dialog!!.throttleDeadzoneCompensationSeekBar.apply {
-            percentProgress = controlPreferences.throttleDeadzone
-            onProgressChangedListener = ::onThrottleDeadzoneChanged
-        }
+        dialog!!.throttleDeadzoneCompensationSeekBar.bindToFloat(controlPreferences::throttleDeadzoneCompensation)
 
-        dialog!!.cruiseGainSeekBar.apply {
-            percentProgress = controlPreferences.cruiseGain
-            onProgressChangedListener = ::onCruiseGainChanged
-        }
+        dialog!!.cruiseGainSeekBar.bindToFloat(controlPreferences::cruiseGain)
 
-        dialog!!.preventSlippingCheckBox.apply {
-            isChecked = controlPreferences.preventSlipping
-            setOnCheckedChangeListener { _, isChecked ->
-                controlPreferences.preventSlipping = isChecked
-            }
-        }
+        dialog!!.preventSlippingCheckBox.bindBoolean(controlPreferences::preventSlipping)
+
+        dialog!!.cruiseDiffDependsOnThrottleCheckBox.bindBoolean(controlPreferences::cruiseDiffDependsOnThrottle)
+
+        dialog!!.cruiseSpeedDiffSeekBar.bindToFloat(controlPreferences::cruiseSpeedDiff)
 
         dialog!!.steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
 
@@ -111,8 +91,14 @@ class DashboardFragment : DialogFragment() {
         dialog!!.steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
     }
 
-    private fun onCruiseGainChanged(value: Float) {
-        controlPreferences.cruiseGain = value
+    private fun CheckBox.bindBoolean(property: KMutableProperty<Boolean>) {
+        isChecked = property.getter.call()
+        setOnCheckedChangeListener { _, isChecked -> property.setter.call(isChecked) }
+    }
+
+    private fun LimitedSeekBar.bindToFloat(property: KMutableProperty<Float>) {
+        percentProgress = property.getter.call()
+        onProgressChangedListener = { property.setter.call(it) }
     }
 
     private fun onSteerStartChanged(value: Float) {
@@ -129,9 +115,5 @@ class DashboardFragment : DialogFragment() {
     private fun onSteerEndChanged(value: Float) {
         dialog!!.steerCenterSeekBar.percentMaxLimit = value
         controlPreferences.steerMax = value
-    }
-
-    private fun onThrottleDeadzoneChanged(value: Float) {
-        controlPreferences.throttleDeadzone = value
     }
 }

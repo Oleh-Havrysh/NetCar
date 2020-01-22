@@ -28,11 +28,15 @@ class ControlPreferences(context: Context) {
 
     var cameraRotation by IntDelegate("CAMERA_ROTATION")
 
-    var throttleDeadzone by FloatDelegate("THROTTLE_DEADZONE")
+    var throttleDeadzoneCompensation by FloatDelegate("THROTTLE_DEADZONE")
 
     var cruiseGain by FloatDelegate("CRUISE_GAIN")
 
     var preventSlipping by BooleanDelegate("PREVENT_SLIPPING")
+
+    var cruiseSpeedDiff by FloatDelegate("CRUISE_SPEED_DIFF")
+
+    var cruiseDiffDependsOnThrottle by BooleanDelegate("CRUISE_DIFF_DEPENDS_ON_THROTTLE")
 
     inner class FloatDelegate(private val key: String, private val default: Float = 0f) :
         ReadWriteProperty<ControlPreferences, Float> {
