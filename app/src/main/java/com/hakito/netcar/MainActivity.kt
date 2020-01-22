@@ -105,7 +105,7 @@ class MainActivity : BaseActivity() {
             viewport.apply {
                 isXAxisBoundsManual = true
                 setMinX(0.0)
-                setMaxX(1.0)
+                setMaxX(3.0)
                 isYAxisBoundsManual = true
                 setMinY(0.0)
                 setMaxY(controlPreferences.requestTimeout.toDouble())
@@ -116,14 +116,14 @@ class MainActivity : BaseActivity() {
     private fun initRpmGraph() {
         rpmGraph.apply {
             addSeries(rpmFrontLeftSeries)
-            addSeries(rpmFrontRightSeries)
+            //addSeries(rpmFrontRightSeries)
             addSeries(rpmRearSeries)
             legendRenderer.isVisible = true
             gridLabelRenderer.isHorizontalLabelsVisible = false
             viewport.apply {
                 isXAxisBoundsManual = true
                 setMinX(0.0)
-                setMaxX(1.0)
+                setMaxX(3.0)
                 isYAxisBoundsManual = true
                 setMinY(0.0)
                 setMaxY(2500.0)
@@ -224,39 +224,40 @@ class MainActivity : BaseActivity() {
     private fun onResponse(response: CarResponse?) {
         val speed = response?.sensors?.frontLeftRpm?.let { getSpeed(it) }
         speed?.apply { maxSpeed = max(maxSpeed, this) }
-        statTextView.text = "max: $maxTime\n" +
-                //"V=$voltageString\n" +
-                "steer: $lastSteerValue, throttle: $lastThrottleValue\n" +
-                "speed = $speed kmh\n" +
-                "maxSpeed = $maxSpeed kmh\n" +
-                //"camera FPS = ${cameraCounter.getRps()}\n" +
-                "control RPS = ${controlCounter.getRps()}\n" +
-                "$errorsMap\n"
+        statTextView.text =
+            """
+max: $maxTime
+steer: $lastSteerValue, throttle: $lastThrottleValue
+speed = $speed kmh
+maxSpeed = $maxSpeed kmh
+control RPS = ${controlCounter.getRps()}
+$errorsMap
+${response?.sensors}"""
 
         timeSeries.appendData(
             DataPoint(
                 getGraphTime(),
                 response?.responseTime?.toDouble() ?: 0.0
-            ), true, 50
+            ), true, 150
         )
         if (response != null) {
             rpmFrontLeftSeries.appendData(
                 DataPoint(
                     getGraphTime(),
                     response.sensors.frontLeftRpm.toDouble()
-                ), true, 50
+                ), true, 150
             )
-            rpmFrontRightSeries.appendData(
+/*            rpmFrontRightSeries.appendData(
                 DataPoint(
                     getGraphTime(),
                     response.sensors.frontRightRpm.toDouble()
-                ), true, 50
-            )
+                ), true, 150
+            )*/
             rpmRearSeries.appendData(
                 DataPoint(
                     getGraphTime(),
                     response.sensors.rearRpm.toDouble()
-                ), true, 50
+                ), true, 150
             )
 
             rpmWarningImageView.isVisible = stabilizationController.isStabilizationWarning()
