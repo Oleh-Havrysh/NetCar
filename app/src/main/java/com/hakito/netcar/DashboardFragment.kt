@@ -1,24 +1,32 @@
 package com.hakito.netcar
 
-import android.app.Dialog
 import android.os.Bundle
 import android.widget.CheckBox
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
+import com.hakito.netcar.cloud.CloudRepository
 import com.hakito.netcar.widget.LimitedSeekBar
 import kotlinx.android.synthetic.main.fragment_dashboard.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.launch
 import kotlin.reflect.KMutableProperty
 
-class DashboardFragment : DialogFragment() {
+class DashboardFragment : DialogFragment(), CoroutineScope {
 
     lateinit var controlPreferences: ControlPreferences
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(context!!)
+    override val coroutineContext = Dispatchers.Main
+
+    private val cloudRepository = CloudRepository()
+
+    override fun onCreateDialog(savedInstanceState: Bundle?) =
+        AlertDialog.Builder(context!!)
             .setView(R.layout.fragment_dashboard)
             .create()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,20 +38,63 @@ class DashboardFragment : DialogFragment() {
         setupView()
     }
 
-    private fun setupView() {
-        dialog!!.voltageMultiplierEditText.apply {
-            setText(controlPreferences.voltageMultiplier.toString())
-            addTextChangedListener {
-                controlPreferences.voltageMultiplier = text.toString().toFloatOrNull() ?: 1f
-            }
-        }
+    override fun onDestroy() {
+        coroutineContext.cancelChildren()
+        super.onDestroy()
+    }
 
+    private fun setupView() {
         dialog!!.requestTimeoutEditText.apply {
             setText(controlPreferences.requestTimeout.toString())
             addTextChangedListener {
                 controlPreferences.requestTimeout = text.toString().toIntOrNull() ?: 100
             }
         }
+
+        dialog!!.cameraEnabledCheckBox.bindToBoolean(controlPreferences::cameraEnabled)
+
+        dialog!!.cameraRotationEditText.apply {
+            setText(controlPreferences.cameraRotation.toString())
+            addTextChangedListener {
+                controlPreferences.cameraRotation = text.toString().toIntOrNull() ?: 0
+            }
+        }
+
+        dialog!!.voltageMultiplierEditText.addTextChangedListener {
+            controlPreferences.voltageMultiplier = it.toString().toFloatOrNull() ?: 1f
+        }
+
+        invalidateCarConfig()
+
+        dialog!!.saveButton.setOnClickListener { onSaveClick() }
+        dialog!!.loadButton.setOnClickListener { onLoadClick() }
+    }
+
+    private fun onSaveClick() {
+        launch {
+            cloudRepository.saveConfig(
+                dialog!!.configNameEditText.text.toString(),
+                controlPreferences.carConfig
+            )
+            Toast.makeText(context, "Config saved", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun onLoadClick() {
+        launch {
+            val config = cloudRepository.loadConfig(dialog!!.configNameEditText.text.toString())
+            if (config == null) {
+                Toast.makeText(context, "Config was not found", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            controlPreferences.carConfig = config
+            invalidateCarConfig()
+            Toast.makeText(context, "Config loaded", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun invalidateCarConfig() {
+        dialog!!.voltageMultiplierEditText.setText(controlPreferences.voltageMultiplier.toString())
 
         dialog!!.invertSteerCheckBox.bindToBoolean(controlPreferences::invertSteer)
 
@@ -62,15 +113,6 @@ class DashboardFragment : DialogFragment() {
         dialog!!.steerEndSeekBar.apply {
             percentProgress = controlPreferences.steerMax
             onProgressChangedListener = ::onSteerEndChanged
-        }
-
-        dialog!!.cameraEnabledCheckBox.bindToBoolean(controlPreferences::cameraEnabled)
-
-        dialog!!.cameraRotationEditText.apply {
-            setText(controlPreferences.cameraRotation.toString())
-            addTextChangedListener {
-                controlPreferences.cameraRotation = text.toString().toIntOrNull() ?: 0
-            }
         }
 
         dialog!!.throttleDeadzoneCompensationSeekBar.bindToFloat(controlPreferences::throttleDeadzoneCompensation)

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "163558049495",
+    "firebase_url": "https://carstabilizationsystem.firebaseio.com",
+    "project_id": "carstabilizationsystem",
+    "storage_bucket": "carstabilizationsystem.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:163558049495:android:33500d7daada84223d9292",
+        "android_client_info": {
+          "package_name": "com.hakito.netcar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "163558049495-gt8tbplisdhdsqsgpfk5jphn6vq24oic.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hakito.netcar",
+            "certificate_hash": "3830f08e9d448daf2d60537fce1970a422f40e78"
+          }
+        },
+        {
+          "client_id": "163558049495-45souibm0a1c8qhdl53m1jimfjb0tiqe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkk1X5QccjoZ0lROTMx1ACYavOD0MU400"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "163558049495-45souibm0a1c8qhdl53m1jimfjb0tiqe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

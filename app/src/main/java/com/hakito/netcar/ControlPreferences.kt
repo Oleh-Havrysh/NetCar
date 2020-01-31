@@ -2,6 +2,7 @@ package com.hakito.netcar
 
 import android.content.Context
 import androidx.core.content.edit
+import com.hakito.netcar.entity.CarConfig
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -9,6 +10,36 @@ class ControlPreferences(context: Context) {
 
     private val preferences =
         context.getSharedPreferences("CONTROL_PREFERENCES", Context.MODE_PRIVATE)
+
+    var carConfig: CarConfig
+        set(value) {
+            steerMin = value.steerMin
+            steerCenter = value.steerCenter
+            steerMax = value.steerMax
+            invertSteer = value.invertSteer
+            throttleMax = value.throttleMax
+            voltageMultiplier = value.voltageMultiplier
+            throttleDeadzoneCompensation = value.throttleDeadzoneCompensation
+            cruiseGain = value.cruiseGain
+            preventSlipping = value.preventSlipping
+            cruiseSpeedDiff = value.cruiseSpeedDiff
+            cruiseDiffDependsOnThrottle = value.cruiseDiffDependsOnThrottle
+            speedDependantSteerLimit = value.speedDependantSteerLimit
+        }
+        get() = CarConfig(
+            steerMin = steerMin,
+            steerCenter = steerCenter,
+            steerMax = steerMax,
+            invertSteer = invertSteer,
+            throttleMax = throttleMax,
+            voltageMultiplier = voltageMultiplier,
+            throttleDeadzoneCompensation = throttleDeadzoneCompensation,
+            cruiseGain = cruiseGain,
+            preventSlipping = preventSlipping,
+            cruiseSpeedDiff = cruiseSpeedDiff,
+            cruiseDiffDependsOnThrottle = cruiseDiffDependsOnThrottle,
+            speedDependantSteerLimit = speedDependantSteerLimit
+        )
 
     var steerMin by FloatDelegate("STEER_MIN")
 
