@@ -14,9 +14,11 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/configNameEditText"
+            <AutoCompleteTextView
+                android:completionThreshold="1"
+                android:id="@+id/configNameAutoCompleteTextView"
                 android:layout_width="0dp"
+                android:imeOptions="flagNoExtractUi"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="Config name" />

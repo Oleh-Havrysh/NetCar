@@ -1,6 +1,7 @@
 package com.hakito.netcar
 
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -68,12 +69,23 @@ class DashboardFragment : DialogFragment(), CoroutineScope {
 
         dialog!!.saveButton.setOnClickListener { onSaveClick() }
         dialog!!.loadButton.setOnClickListener { onLoadClick() }
+
+        loadConfigNames()
+    }
+
+    private fun loadConfigNames() {
+        launch {
+            val names = cloudRepository.getConfigNames()
+            val adapter =
+                ArrayAdapter<String>(context!!, android.R.layout.simple_dropdown_item_1line, names)
+            dialog!!.configNameAutoCompleteTextView.setAdapter(adapter)
+        }
     }
 
     private fun onSaveClick() {
         launch {
             cloudRepository.saveConfig(
-                dialog!!.configNameEditText.text.toString(),
+                getConfigName(),
                 controlPreferences.carConfig
             )
             Toast.makeText(context, "Config saved", Toast.LENGTH_SHORT).show()
@@ -82,7 +94,7 @@ class DashboardFragment : DialogFragment(), CoroutineScope {
 
     private fun onLoadClick() {
         launch {
-            val config = cloudRepository.loadConfig(dialog!!.configNameEditText.text.toString())
+            val config = cloudRepository.loadConfig(getConfigName())
             if (config == null) {
                 Toast.makeText(context, "Config was not found", Toast.LENGTH_SHORT).show()
                 return@launch
@@ -92,6 +104,8 @@ class DashboardFragment : DialogFragment(), CoroutineScope {
             Toast.makeText(context, "Config loaded", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun getConfigName() = dialog!!.configNameAutoCompleteTextView.text.toString()
 
     private fun invalidateCarConfig() {
         dialog!!.voltageMultiplierEditText.setText(controlPreferences.voltageMultiplier.toString())
