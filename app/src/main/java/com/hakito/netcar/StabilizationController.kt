@@ -15,7 +15,7 @@ class StabilizationController(private val preferences: ControlPreferences) {
 
     private var cruiseThrottle = 0f
 
-    private var sensors = Sensors(0, 0, 0)
+    private var sensors = Sensors(0, 0, 0, 0f)
 
     var targetCruiseRpm = 0
         set(value) {

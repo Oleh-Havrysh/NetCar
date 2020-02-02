@@ -213,10 +213,6 @@ class MainActivity : BaseActivity() {
             maxTime = max(response.responseTime, maxTime)
         }
 
-        /*     val voltageString =
-                 response?.voltageRaw?.times(controlPreferences.voltageMultiplier)
-                     ?.let { String.format("%.2f", it) }
-     */
         response?.sensors?.also(stabilizationController::onSensorsReceived)
 
         responseHandlingChannel.offer(response)
@@ -225,12 +221,16 @@ class MainActivity : BaseActivity() {
     private fun onResponse(response: CarResponse?) {
         val speed = response?.sensors?.frontLeftRpm?.let { getSpeed(it) }
         speed?.apply { maxSpeed = max(maxSpeed, this) }
+        val voltageString =
+            response?.sensors?.voltage?.times(controlPreferences.voltageMultiplier)
+                ?.let { String.format("%.2f", it) }
         statTextView.text =
             """
 steer: $lastSteerValue, throttle: $lastThrottleValue
 speed = $speed kmh
 maxSpeed = $maxSpeed kmh
 control RPS = ${controlCounter.getRps()}
+battery = $voltageString
 $errorsMap"""
 
         timeSeries.appendData(
