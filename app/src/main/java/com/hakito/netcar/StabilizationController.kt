@@ -2,7 +2,6 @@ package com.hakito.netcar
 
 import com.hakito.netcar.sender.Sensors
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.min
 
 class StabilizationController(private val preferences: ControlPreferences) {
@@ -15,7 +14,7 @@ class StabilizationController(private val preferences: ControlPreferences) {
 
     private var cruiseThrottle = 0f
 
-    private var sensors = Sensors(0, 0, 0, 0f)
+    private var sensors = Sensors(0, 0, 0, 0)
 
     var targetCruiseRpm = 0
         set(value) {
@@ -52,7 +51,7 @@ class StabilizationController(private val preferences: ControlPreferences) {
             !isSensorsCalibrated -> userThrottle
             isCruiseEnabled() -> {
                 val targetRpm = if (preferences.preventSlipping)
-                    targetCruiseRpm.constraint(0, sensors.frontLeftRpm + getMaxFrontRearSpeedDiff())
+                    targetCruiseRpm.coerceIn(0, sensors.frontLeftRpm + getMaxFrontRearSpeedDiff())
                 else targetCruiseRpm
                 adjustAndGetCruiseThrottle(targetRpm, preferences.throttleMax)
             }
@@ -73,23 +72,17 @@ class StabilizationController(private val preferences: ControlPreferences) {
 
     private fun adjustAndGetCruiseThrottle(targetRpm: Int, maxThrottle: Float): Float {
         val rpmDiff = ((targetRpm - sensors.rearRpm) / 1000f)
-            .constraint(-1f, 1f)
+            .coerceIn(-1f, 1f)
         return (cruiseThrottle + rpmDiff * preferences.cruiseGain * getAndSetDeltaTimeSeconds())
-            .constraint(min(maxThrottle, preferences.throttleDeadzoneCompensation), maxThrottle)
+            .coerceIn(min(maxThrottle, preferences.throttleDeadzoneCompensation), maxThrottle)
             .also { cruiseThrottle = it }
     }
-
-    private fun Float.constraint(minConstraint: Float, maxConstraint: Float) =
-        max(minConstraint, min(maxConstraint, this))
-
-    private fun Int.constraint(minConstraint: Int, maxConstraint: Int) =
-        max(minConstraint, min(maxConstraint, this))
 
     private fun Float.interpolateProgress(minValue: Float, maxValue: Float) =
         minValue + this * (maxValue - minValue)
 
     fun calcSteer(userSteer: Float): Float {
-        val relativeRpm = (sensors.frontLeftRpm / 2000f).constraint(0f, 1f)
+        val relativeRpm = (sensors.frontLeftRpm / 2000f).coerceIn(0f, 1f)
         return userSteer * relativeRpm.interpolateProgress(1f, preferences.speedDependantSteerLimit)
     }
 

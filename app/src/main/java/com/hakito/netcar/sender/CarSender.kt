@@ -17,5 +17,5 @@ data class Sensors(
     val frontLeftRpm: Int,
     val frontRightRpm: Int,
     val rearRpm: Int,
-    val voltage: Float
+    val voltage: Int
 )

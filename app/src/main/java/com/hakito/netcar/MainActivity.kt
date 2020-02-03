@@ -62,6 +62,8 @@ class MainActivity : BaseActivity() {
 
     private val responseHandlingChannel = Channel<CarResponse?>(Channel.CONFLATED)
 
+    private lateinit var batteryProcessor: BatteryProcessor
+
     override val layoutRes = R.layout.activity_main
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +71,7 @@ class MainActivity : BaseActivity() {
         controlPreferences = ControlPreferences(this)
 
         stabilizationController = StabilizationController(controlPreferences)
+        batteryProcessor = BatteryProcessor(controlPreferences)
 
         dashboardButton.setOnClickListener {
             DashboardFragment().show(supportFragmentManager, "")
@@ -221,17 +224,19 @@ class MainActivity : BaseActivity() {
     private fun onResponse(response: CarResponse?) {
         val speed = response?.sensors?.frontLeftRpm?.let { getSpeed(it) }
         speed?.apply { maxSpeed = max(maxSpeed, this) }
-        val voltageString =
-            response?.sensors?.voltage?.times(controlPreferences.voltageMultiplier)
-                ?.let { String.format("%.2f", it) }
         statTextView.text =
             """
 steer: $lastSteerValue, throttle: $lastThrottleValue
 speed = $speed kmh
 maxSpeed = $maxSpeed kmh
 control RPS = ${controlCounter.getRps()}
-battery = $voltageString
 $errorsMap"""
+
+        response?.sensors?.voltage?.let {
+            val battery = batteryProcessor.processRawVoltage(it)
+            batteryTextView.text = battery.text
+            batteryTextView.setTextColor(battery.color)
+        }
 
         timeSeries.appendData(
             DataPoint(
