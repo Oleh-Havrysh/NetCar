@@ -1,26 +1,51 @@
 package com.hakito.netcar.cloud
 
-import com.google.firebase.database.FirebaseDatabase
 import com.hakito.netcar.entity.CarConfig
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
+import java.security.cert.X509Certificate
+import javax.net.ssl.X509TrustManager
 
 class CloudRepository {
 
-    private val database = FirebaseDatabase.getInstance()
+    private val api = Retrofit.Builder()
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(
+            OkHttpClient.Builder()
+                .sslSocketFactory(TLSSocketFactory(), object : X509TrustManager {
+                    override fun checkClientTrusted(
+                        chain: Array<out X509Certificate>?,
+                        authType: String?
+                    ) {
+                    }
 
-    suspend fun loadConfig(name: String): CarConfig? =
-        database.getReference("configs/$name").getValue()
+                    override fun checkServerTrusted(
+                        chain: Array<out X509Certificate>?,
+                        authType: String?
+                    ) {
+                    }
+
+                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                })
+                .build()
+        )
+        .baseUrl("https://carstabilizationsystem.firebaseio.com/")
+        .build()
+        .create<CloudApi>()
+
+    suspend fun loadConfig(name: String) =
+        api.getConfig(name)
+            ?.toDomain()
 
     suspend fun saveConfig(name: String, config: CarConfig) =
-        database.getReference("configs/$name")
-            .setValue(config.toFirebase())
-            .await()
+        api.putConfig(config.toFirebase(), name)
 
-    suspend fun getConfigNames(): List<String> =
-        database.getReference("configs")
-            .getSnapshot()
-            ?.children
-            ?.map { it.key!! }
-            ?: emptyList()
+    suspend fun getConfigNames() =
+        api.getAllConfigs()
+            .keys
+            .toList()
 
     private fun CarConfig.toFirebase() = FirebaseCarConfig(
         steerMin = steerMin,
@@ -50,20 +75,5 @@ class CloudRepository {
         cruiseSpeedDiff = cruiseSpeedDiff,
         cruiseDiffDependsOnThrottle = cruiseDiffDependsOnThrottle,
         speedDependantSteerLimit = speedDependantSteerLimit
-    )
-
-    class FirebaseCarConfig(
-        val steerMin: Float,
-        val steerCenter: Float,
-        val steerMax: Float,
-        val invertSteer: Boolean,
-        val throttleMax: Float,
-        val voltageMultiplier: Float,
-        val throttleDeadzoneCompensation: Float,
-        val cruiseGain: Float,
-        val preventSlipping: Boolean,
-        val cruiseSpeedDiff: Float,
-        val cruiseDiffDependsOnThrottle: Boolean,
-        val speedDependantSteerLimit: Float
     )
 }

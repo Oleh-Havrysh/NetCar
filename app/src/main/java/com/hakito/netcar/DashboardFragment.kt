@@ -75,10 +75,16 @@ class DashboardFragment : DialogFragment(), CoroutineScope {
 
     private fun loadConfigNames() {
         launch {
-            val names = cloudRepository.getConfigNames()
-            val adapter =
-                ArrayAdapter<String>(context!!, android.R.layout.simple_dropdown_item_1line, names)
-            dialog!!.configNameAutoCompleteTextView.setAdapter(adapter)
+            runCatching { cloudRepository.getConfigNames() }
+                .fold({
+                    val adapter =
+                        ArrayAdapter<String>(
+                            context!!,
+                            android.R.layout.simple_dropdown_item_1line,
+                            it
+                        )
+                    dialog!!.configNameAutoCompleteTextView.setAdapter(adapter)
+                }, { Toast.makeText(context ?: return@fold, it.message, Toast.LENGTH_LONG).show() })
         }
     }
 
