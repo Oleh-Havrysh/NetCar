@@ -1,13 +1,17 @@
 package com.hakito.netcar
 
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import com.hakito.netcar.cloud.CloudRepository
+import com.hakito.netcar.util.withErrorHandler
+import com.hakito.netcar.util.withProgress
 import com.hakito.netcar.widget.LimitedSeekBar
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.coroutines.CoroutineScope
@@ -16,7 +20,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlin.reflect.KMutableProperty
 
-class DashboardFragment : DialogFragment(), CoroutineScope {
+class DashboardFragment : Fragment(), CoroutineScope {
 
     lateinit var controlPreferences: ControlPreferences
 
@@ -24,51 +28,47 @@ class DashboardFragment : DialogFragment(), CoroutineScope {
 
     private val cloudRepository = CloudRepository()
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) =
-        AlertDialog.Builder(context!!)
-            .setView(R.layout.fragment_dashboard)
-            .create()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         controlPreferences = ControlPreferences(context!!)
     }
 
-    override fun onStart() {
-        super.onStart()
-        setupView()
-    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = inflater.inflate(R.layout.fragment_dashboard, container, false)
 
     override fun onDestroy() {
         coroutineContext.cancelChildren()
         super.onDestroy()
     }
 
-    private fun setupView() {
-        dialog!!.requestTimeoutEditText.apply {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        requestTimeoutEditText.apply {
             setText(controlPreferences.requestTimeout.toString())
             addTextChangedListener {
                 controlPreferences.requestTimeout = text.toString().toIntOrNull() ?: 100
             }
         }
 
-        dialog!!.cameraEnabledCheckBox.bindToBoolean(controlPreferences::cameraEnabled)
+        cameraEnabledCheckBox.bindToBoolean(controlPreferences::cameraEnabled)
 
-        dialog!!.cameraRotationEditText.apply {
+        cameraRotationEditText.apply {
             setText(controlPreferences.cameraRotation.toString())
             addTextChangedListener {
                 controlPreferences.cameraRotation = text.toString().toIntOrNull() ?: 0
             }
         }
 
-        dialog!!.voltageMultiplierEditText.addTextChangedListener {
+        voltageMultiplierEditText.addTextChangedListener {
             controlPreferences.voltageMultiplier = it.toString().toFloatOrNull() ?: 1f
         }
 
         invalidateCarConfig()
 
-        dialog!!.saveButton.setOnClickListener { onSaveClick() }
-        dialog!!.loadButton.setOnClickListener { onLoadClick() }
+        saveButton.setOnClickListener { onSaveClick() }
+        loadButton.setOnClickListener { onLoadClick() }
 
         loadConfigNames()
     }
@@ -83,76 +83,84 @@ class DashboardFragment : DialogFragment(), CoroutineScope {
                             android.R.layout.simple_dropdown_item_1line,
                             it
                         )
-                    dialog!!.configNameAutoCompleteTextView.setAdapter(adapter)
+                    configNameAutoCompleteTextView.setAdapter(adapter)
                 }, { Toast.makeText(context ?: return@fold, it.message, Toast.LENGTH_LONG).show() })
         }
     }
 
     private fun onSaveClick() {
         launch {
-            cloudRepository.saveConfig(
-                getConfigName(),
-                controlPreferences.carConfig
-            )
-            Toast.makeText(context, "Config saved", Toast.LENGTH_SHORT).show()
+            withProgress {
+                withErrorHandler {
+                    cloudRepository.saveConfig(
+                        getConfigName(),
+                        controlPreferences.carConfig
+                    )
+                    Toast.makeText(context, "Config saved", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
     private fun onLoadClick() {
         launch {
-            val config = cloudRepository.loadConfig(getConfigName())
-            if (config == null) {
-                Toast.makeText(context, "Config was not found", Toast.LENGTH_SHORT).show()
-                return@launch
+            withProgress {
+                withErrorHandler {
+                    val config = cloudRepository.loadConfig(getConfigName())
+                    if (config == null) {
+                        Toast.makeText(context, "Config was not found", Toast.LENGTH_SHORT).show()
+                        return@withErrorHandler
+                    }
+                    controlPreferences.carConfig = config
+                    invalidateCarConfig()
+                    Toast.makeText(context, "Config loaded", Toast.LENGTH_SHORT).show()
+                }
             }
-            controlPreferences.carConfig = config
-            invalidateCarConfig()
-            Toast.makeText(context, "Config loaded", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun getConfigName() = dialog!!.configNameAutoCompleteTextView.text.toString()
+    private fun getConfigName() = configNameAutoCompleteTextView.text.toString()
 
     private fun invalidateCarConfig() {
-        dialog!!.voltageMultiplierEditText.setText(controlPreferences.voltageMultiplier.toString())
+        voltageMultiplierEditText.setText(controlPreferences.voltageMultiplier.toString())
 
-        dialog!!.invertSteerCheckBox.bindToBoolean(controlPreferences::invertSteer)
+        invertSteerCheckBox.bindToBoolean(controlPreferences::invertSteer)
 
-        dialog!!.throttleLimitSeekBar.bindToFloat(controlPreferences::throttleMax)
+        throttleLimitSeekBar.bindToFloat(controlPreferences::throttleMax)
 
-        dialog!!.steerStartSeekBar.apply {
+        steerStartSeekBar.apply {
             percentProgress = controlPreferences.steerMin
             onProgressChangedListener = ::onSteerStartChanged
         }
 
-        dialog!!.steerCenterSeekBar.apply {
+        steerCenterSeekBar.apply {
             percentProgress = controlPreferences.steerCenter
             onProgressChangedListener = ::onSteerCenterChanged
         }
 
-        dialog!!.steerEndSeekBar.apply {
+        steerEndSeekBar.apply {
             percentProgress = controlPreferences.steerMax
             onProgressChangedListener = ::onSteerEndChanged
         }
 
-        dialog!!.throttleDeadzoneCompensationSeekBar.bindToFloat(controlPreferences::throttleDeadzoneCompensation)
+        throttleDeadzoneCompensationSeekBar.bindToFloat(controlPreferences::throttleDeadzoneCompensation)
 
-        dialog!!.cruiseGainSeekBar.bindToFloat(controlPreferences::cruiseGain)
+        cruiseGainSeekBar.bindToFloat(controlPreferences::cruiseGain)
 
-        dialog!!.preventSlippingCheckBox.bindToBoolean(controlPreferences::preventSlipping)
+        preventSlippingCheckBox.bindToBoolean(controlPreferences::preventSlipping)
 
-        dialog!!.cruiseDiffDependsOnThrottleCheckBox.bindToBoolean(controlPreferences::cruiseDiffDependsOnThrottle)
+        cruiseDiffDependsOnThrottleCheckBox.bindToBoolean(controlPreferences::cruiseDiffDependsOnThrottle)
 
-        dialog!!.cruiseSpeedDiffSeekBar.bindToFloat(controlPreferences::cruiseSpeedDiff)
+        cruiseSpeedDiffSeekBar.bindToFloat(controlPreferences::cruiseSpeedDiff)
 
-        dialog!!.speedDependantSteerLimitSeekBar.bindToFloat(controlPreferences::speedDependantSteerLimit)
+        speedDependantSteerLimitSeekBar.bindToFloat(controlPreferences::speedDependantSteerLimit)
 
-        dialog!!.steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
+        steerStartSeekBar.percentMaxLimit = controlPreferences.steerCenter
 
-        dialog!!.steerCenterSeekBar.percentMinLimit = controlPreferences.steerMin
-        dialog!!.steerCenterSeekBar.percentMaxLimit = controlPreferences.steerMax
+        steerCenterSeekBar.percentMinLimit = controlPreferences.steerMin
+        steerCenterSeekBar.percentMaxLimit = controlPreferences.steerMax
 
-        dialog!!.steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
+        steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
     }
 
     private fun CheckBox.bindToBoolean(property: KMutableProperty<Boolean>) {
@@ -166,18 +174,18 @@ class DashboardFragment : DialogFragment(), CoroutineScope {
     }
 
     private fun onSteerStartChanged(value: Float) {
-        dialog!!.steerCenterSeekBar.percentMinLimit = value
+        steerCenterSeekBar.percentMinLimit = value
         controlPreferences.steerMin = value
     }
 
     private fun onSteerCenterChanged(value: Float) {
-        dialog!!.steerStartSeekBar.percentMaxLimit = value
-        dialog!!.steerEndSeekBar.percentMinLimit = value
+        steerStartSeekBar.percentMaxLimit = value
+        steerEndSeekBar.percentMinLimit = value
         controlPreferences.steerCenter = value
     }
 
     private fun onSteerEndChanged(value: Float) {
-        dialog!!.steerCenterSeekBar.percentMaxLimit = value
+        steerCenterSeekBar.percentMaxLimit = value
         controlPreferences.steerMax = value
     }
 }
