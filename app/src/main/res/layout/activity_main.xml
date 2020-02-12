@@ -7,17 +7,6 @@
     android:keepScreenOn="true"
     tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/image"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        app:layout_constraintDimensionRatio="1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="ContentDescription"
-        tools:src="@tools:sample/backgrounds/scenic" />
-
     <TextView
         android:id="@+id/batteryTextView"
         android:layout_width="wrap_content"

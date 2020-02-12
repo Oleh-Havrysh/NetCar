@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.widget.SeekBar
 import androidx.appcompat.widget.AppCompatSeekBar
 import kotlin.math.roundToInt
@@ -33,7 +34,8 @@ constructor(context: Context, attrs: AttributeSet) :
     var onProgressChangedListener: ((Float) -> Unit)? = null
 
     private val paint = Paint().apply {
-        textSize = 20f
+        textSize =
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9f, resources.displayMetrics)
     }
 
     init {
@@ -64,6 +66,6 @@ constructor(context: Context, attrs: AttributeSet) :
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawText(String.format("%1$.2f", percentProgress), width / 2f, 20f, paint)
+        canvas.drawText(String.format("%1$.3f", percentProgress), width / 2f, 20f, paint)
     }
 }

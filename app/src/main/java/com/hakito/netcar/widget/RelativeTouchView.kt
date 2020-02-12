@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -30,6 +29,11 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
                 ?.divide(workZoneRadius)
                 ?.invertY()
         }
+
+    fun resetTouch() {
+        basePoint = null
+        touchPoint = null
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -64,7 +68,12 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
             canvas.drawCircle(basePoint!!.x, basePoint!!.y, 10f, paint)
             canvas.drawCircle(touchPoint!!.x, touchPoint!!.y, 10f, paint)
 
-            canvas.drawCircle(basePoint!!.x, basePoint!!.y, progress!!.times(workZoneRadius).len(), paint)
+            canvas.drawCircle(
+                basePoint!!.x,
+                basePoint!!.y,
+                progress!!.times(workZoneRadius).len(),
+                paint
+            )
         }
     }
 
@@ -77,7 +86,7 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
         fun center(v: Vector) = Vector((x + v.x) / 2, (y + v.y) / 2)
 
         fun clamp(lowerBound: Float, upperBound: Float) =
-            Vector(clamp(x, lowerBound, upperBound), clamp(y, lowerBound, upperBound))
+            Vector(x.coerceIn(lowerBound, upperBound), y.coerceIn(lowerBound, upperBound))
 
         fun len(v: Vector) = sqrt((x - v.x).pow(2) + (y - v.y).pow(2))
 
@@ -89,9 +98,6 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
 
         companion object {
             val ZERO = Vector(0f, 0f)
-
-            private fun clamp(value: Float, lowerBound: Float, upperBound: Float) =
-                max(lowerBound, min(upperBound, value))
         }
     }
 }

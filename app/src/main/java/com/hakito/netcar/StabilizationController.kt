@@ -48,7 +48,7 @@ class StabilizationController(private val preferences: ControlPreferences) {
     fun calcThrottle(userThrottle: Float): Float =
         when {
             userThrottle <= 0 -> userThrottle * 0.5f
-            !isSensorsCalibrated -> userThrottle
+            !isSensorsCalibrated && (isCruiseEnabled() || preferences.preventSlipping) -> 0f
             isCruiseEnabled() -> {
                 val targetRpm = if (preferences.preventSlipping)
                     targetCruiseRpm.coerceIn(0, sensors.frontLeftRpm + getMaxFrontRearSpeedDiff())

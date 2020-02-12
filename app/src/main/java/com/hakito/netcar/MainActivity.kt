@@ -53,7 +53,6 @@ class MainActivity : BaseActivity() {
 
     private var maxSpeed = 0
 
-    private val cameraCounter = OperationsPerSecondCounter(10)
     private val controlCounter = OperationsPerSecondCounter(50)
 
     private lateinit var stabilizationController: StabilizationController
@@ -86,8 +85,6 @@ class MainActivity : BaseActivity() {
         initRpmGraph()
 
         sender = CarSenderImpl(controlPreferences)
-
-        image.rotation = controlPreferences.cameraRotation.toFloat()
 
         desiredRpmSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -141,6 +138,8 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        throttleTouchView.resetTouch()
+        steerTouchView.resetTouch()
         startSending()
     }
 
@@ -176,21 +175,6 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
-
-/*        cameraJob = launch(Dispatchers.IO) {
-            while (true) {
-                if (!controlPreferences.cameraEnabled) {
-                    delay(1000)
-                    continue
-                }
-                val bitmap = runCatching { sender.getImage() }.getOrNull()
-                    ?.also { cameraCounter.onPerformed() }
-
-                launch(Dispatchers.Main) {
-                    bitmap?.also { image.setImageBitmap(it) }
-                }
-            }
-        }*/
     }
 
     private fun mapSteer(steerValue: Float): Float {
