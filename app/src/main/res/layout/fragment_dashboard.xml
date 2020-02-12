@@ -211,5 +211,11 @@
             android:layout_height="wrap_content"
             android:max="500" />
 
+        <CheckBox
+            android:id="@+id/throttleControlsSpeedCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Throttle controls speed (0-2k RPM)" />
+
     </LinearLayout>
 </ScrollView>

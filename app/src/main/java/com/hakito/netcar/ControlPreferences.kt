@@ -71,6 +71,8 @@ class ControlPreferences(context: Context) {
 
     var speedDependantSteerLimit by FloatDelegate("SPEED_DEPENDANT_STEER_LIMIT", 1f)
 
+    var throttleControlsSpeed by BooleanDelegate("THROTTLE_CONTROLS_SPEED")
+
     inner class FloatDelegate(private val key: String, private val default: Float = 0f) :
         ReadWriteProperty<ControlPreferences, Float> {
 

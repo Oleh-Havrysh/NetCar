@@ -14,7 +14,6 @@ class BatteryProcessor(private val preferences: ControlPreferences) {
 
         val color = when {
             percents < 25 -> Color.RED
-            percents > 75 -> Color.GREEN
             else -> Color.BLACK
         }
 

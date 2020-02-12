@@ -153,6 +153,8 @@ class DashboardFragment : DialogFragment(), CoroutineScope {
         dialog!!.steerCenterSeekBar.percentMaxLimit = controlPreferences.steerMax
 
         dialog!!.steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
+
+        dialog!!.throttleControlsSpeedCheckBox.bindToBoolean(controlPreferences::throttleControlsSpeed)
     }
 
     private fun CheckBox.bindToBoolean(property: KMutableProperty<Boolean>) {
