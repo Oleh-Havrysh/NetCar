@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.core.view.isVisible
+import androidx.fragment.app.commit
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarResponse
 import com.hakito.netcar.sender.CarSender
@@ -74,7 +75,11 @@ class MainActivity : BaseActivity() {
         batteryProcessor = BatteryProcessor(controlPreferences)
 
         dashboardButton.setOnClickListener {
-            DashboardFragment().show(supportFragmentManager, "")
+            supportFragmentManager
+                .commit {
+                    replace(R.id.fragmentContainer, DashboardFragment())
+                    addToBackStack(null)
+                }
         }
 
         initTimeGraph()
