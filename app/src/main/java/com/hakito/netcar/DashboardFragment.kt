@@ -65,6 +65,8 @@ class DashboardFragment : Fragment(), CoroutineScope {
             controlPreferences.voltageMultiplier = it.toString().toFloatOrNull() ?: 1f
         }
 
+        lightSeekBar.bindToFloat(controlPreferences::light)
+
         invalidateCarConfig()
 
         saveButton.setOnClickListener { onSaveClick() }

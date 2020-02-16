@@ -63,6 +63,7 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
         .addPathSegments("car")
         .addQueryParameter("steer", params.steer.toString())
         .addQueryParameter("throttle", params.throttle.toString())
+        .addQueryParameter("light", params.light.toString())
         .build()
 
     companion object {

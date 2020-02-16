@@ -191,7 +191,13 @@ class MainActivity : BaseActivity() {
         lastThrottleValue = throttle
         val response =
             try {
-                sender.send(CarParams(steerValue, throttle))
+                sender.send(
+                    CarParams(
+                        steerValue,
+                        throttle,
+                        (controlPreferences.light * 1023).toInt()
+                    )
+                )
                     .also { controlCounter.onPerformed() }
             } catch (e: IOException) {
                 e.printStackTrace()

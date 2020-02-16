@@ -73,6 +73,8 @@ class ControlPreferences(context: Context) {
 
     var throttleControlsSpeed by BooleanDelegate("THROTTLE_CONTROLS_SPEED")
 
+    var light by FloatDelegate("LIGHT")
+
     inner class FloatDelegate(private val key: String, private val default: Float = 0f) :
         ReadWriteProperty<ControlPreferences, Float> {
 
