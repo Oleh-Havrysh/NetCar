@@ -7,7 +7,9 @@ class BatteryProcessor(private val preferences: ControlPreferences) {
 
     fun processRawVoltage(rawVoltage: Int): BatteryUi {
         val voltage = rawVoltage * preferences.voltageMultiplier
-        val percents = ((voltage / CELLS_COUNT - MIN_VOLTAGE) / (MAX_VOLTAGE - MIN_VOLTAGE) * 100)
+        val cellsCount = (voltage / NOMINAL_VOLTAGE).roundToInt()
+        if (cellsCount == 0) return BatteryUi("Batt error", Color.RED)
+        val percents = ((voltage / cellsCount - MIN_VOLTAGE) / (MAX_VOLTAGE - MIN_VOLTAGE) * 100)
             .roundToInt()
             .coerceIn(0, 100)
         val voltageString = String.format("%d%%(%.2fV)", percents, voltage)
@@ -25,7 +27,6 @@ class BatteryProcessor(private val preferences: ControlPreferences) {
     companion object {
         private const val MIN_VOLTAGE = 3.5f
         private const val MAX_VOLTAGE = 4.2f
-
-        private const val CELLS_COUNT = 2
+        private const val NOMINAL_VOLTAGE = 3.7f
     }
 }
