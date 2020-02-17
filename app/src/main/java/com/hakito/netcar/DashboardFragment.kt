@@ -1,30 +1,22 @@
 package com.hakito.netcar
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.CheckBox
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.Fragment
+import com.hakito.netcar.base.BaseFragment
 import com.hakito.netcar.cloud.CloudRepository
-import com.hakito.netcar.util.withErrorHandler
-import com.hakito.netcar.util.withProgress
-import com.hakito.netcar.widget.LimitedSeekBar
+import com.hakito.netcar.util.bindToBoolean
+import com.hakito.netcar.util.bindToFloat
+import com.hakito.netcar.util.bindToInt
+import com.hakito.netcar.util.launchWithProgressAndErrorHandling
 import kotlinx.android.synthetic.main.fragment_dashboard.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
-import kotlin.reflect.KMutableProperty
 
-class DashboardFragment : Fragment(), CoroutineScope {
+class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
 
-    lateinit var controlPreferences: ControlPreferences
-
-    override val coroutineContext = Dispatchers.Main
+    private lateinit var controlPreferences: ControlPreferences
 
     private val cloudRepository = CloudRepository()
 
@@ -33,33 +25,11 @@ class DashboardFragment : Fragment(), CoroutineScope {
         controlPreferences = ControlPreferences(context!!)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_dashboard, container, false)
-
-    override fun onDestroy() {
-        coroutineContext.cancelChildren()
-        super.onDestroy()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        requestTimeoutEditText.apply {
-            setText(controlPreferences.requestTimeout.toString())
-            addTextChangedListener {
-                controlPreferences.requestTimeout = text.toString().toIntOrNull() ?: 100
-            }
-        }
+        requestTimeoutEditText.bindToInt(controlPreferences::requestTimeout)
 
         cameraEnabledCheckBox.bindToBoolean(controlPreferences::cameraEnabled)
-
-        cameraRotationEditText.apply {
-            setText(controlPreferences.cameraRotation.toString())
-            addTextChangedListener {
-                controlPreferences.cameraRotation = text.toString().toIntOrNull() ?: 0
-            }
-        }
+        cameraRotationEditText.bindToInt(controlPreferences::cameraRotation)
 
         voltageMultiplierEditText.addTextChangedListener {
             controlPreferences.voltageMultiplier = it.toString().toFloatOrNull() ?: 1f
@@ -91,33 +61,22 @@ class DashboardFragment : Fragment(), CoroutineScope {
     }
 
     private fun onSaveClick() {
-        launch {
-            withProgress {
-                withErrorHandler {
-                    cloudRepository.saveConfig(
-                        getConfigName(),
-                        controlPreferences.carConfig
-                    )
-                    Toast.makeText(context, "Config saved", Toast.LENGTH_SHORT).show()
-                }
-            }
+        launchWithProgressAndErrorHandling {
+            cloudRepository.saveConfig(
+                getConfigName(),
+                controlPreferences.carConfig
+            )
+            Toast.makeText(context, "Config saved", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun onLoadClick() {
-        launch {
-            withProgress {
-                withErrorHandler {
-                    val config = cloudRepository.loadConfig(getConfigName())
-                    if (config == null) {
-                        Toast.makeText(context, "Config was not found", Toast.LENGTH_SHORT).show()
-                        return@withErrorHandler
-                    }
-                    controlPreferences.carConfig = config
-                    invalidateCarConfig()
-                    Toast.makeText(context, "Config loaded", Toast.LENGTH_SHORT).show()
-                }
-            }
+        launchWithProgressAndErrorHandling {
+            val config = cloudRepository.loadConfig(getConfigName())
+                ?: throw Exception("Config was not found")
+            controlPreferences.carConfig = config
+            invalidateCarConfig()
+            Toast.makeText(context, "Config loaded", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -165,16 +124,6 @@ class DashboardFragment : Fragment(), CoroutineScope {
         steerEndSeekBar.percentMinLimit = controlPreferences.steerCenter
 
         throttleControlsSpeedCheckBox.bindToBoolean(controlPreferences::throttleControlsSpeed)
-    }
-
-    private fun CheckBox.bindToBoolean(property: KMutableProperty<Boolean>) {
-        isChecked = property.getter.call()
-        setOnCheckedChangeListener { _, isChecked -> property.setter.call(isChecked) }
-    }
-
-    private fun LimitedSeekBar.bindToFloat(property: KMutableProperty<Float>) {
-        percentProgress = property.getter.call()
-        onProgressChangedListener = { property.setter.call(it) }
     }
 
     private fun onSteerStartChanged(value: Float) {

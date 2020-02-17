@@ -11,7 +11,7 @@ suspend fun Context.withErrorHandler(block: suspend () -> Unit) {
         AlertDialog.Builder(this)
             .setTitle("Error")
             .setMessage(t.message)
-            .setPositiveButton("OK", { _, _ -> })
+            .setPositiveButton("OK") { _, _ -> }
             .show()
     }
 }
