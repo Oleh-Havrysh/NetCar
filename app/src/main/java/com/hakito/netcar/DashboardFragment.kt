@@ -31,6 +31,8 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
         cameraEnabledCheckBox.bindToBoolean(controlPreferences::cameraEnabled)
         cameraRotationEditText.bindToInt(controlPreferences::cameraRotation)
 
+        backgroundBrightnessSeekBar.bindToFloat(controlPreferences::backgroundBrightness)
+
         voltageMultiplierEditText.addTextChangedListener {
             controlPreferences.voltageMultiplier = it.toString().toFloatOrNull() ?: 1f
         }

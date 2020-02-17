@@ -1,6 +1,7 @@
 package com.hakito.netcar
 
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.core.view.isVisible
@@ -99,6 +100,14 @@ class MainActivity : BaseActivity() {
         launch {
             responseHandlingChannel.consumeEach(::onResponse)
         }
+
+        adjustBrightness()
+    }
+
+    private fun adjustBrightness() {
+        val brightness = (controlPreferences.backgroundBrightness * 255).toInt()
+        val color = Color.rgb(brightness, brightness, brightness)
+        window.setBackgroundDrawable(ColorDrawable(color))
     }
 
     private fun getGraphTime() = (System.currentTimeMillis() - graphStartTime) / 1000.0

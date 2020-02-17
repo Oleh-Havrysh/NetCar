@@ -48,7 +48,18 @@
             android:id="@+id/lightSeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="180" />
+            android:max="1000" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Background brightness" />
+
+        <com.hakito.netcar.widget.LimitedSeekBar
+            android:id="@+id/backgroundBrightnessSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="1000" />
 
         <include layout="@layout/divider" />
 
@@ -72,7 +83,7 @@
             android:id="@+id/steerStartSeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="180" />
+            android:max="1000" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -83,7 +94,7 @@
             android:id="@+id/steerCenterSeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="180" />
+            android:max="1000" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -94,7 +105,7 @@
             android:id="@+id/steerEndSeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="180" />
+            android:max="1000" />
 
         <include layout="@layout/divider" />
 

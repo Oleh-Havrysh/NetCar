@@ -75,6 +75,8 @@ class ControlPreferences(context: Context) {
 
     var light by FloatDelegate("LIGHT")
 
+    var backgroundBrightness by FloatDelegate("BACKGROUND_BRIGHTNESS", 0.2f)
+
     inner class FloatDelegate(private val key: String, private val default: Float = 0f) :
         ReadWriteProperty<ControlPreferences, Float> {
 
