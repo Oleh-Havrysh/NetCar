@@ -11,8 +11,8 @@
         android:id="@+id/batteryTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="87%" />
@@ -51,6 +51,7 @@
         android:id="@+id/steerTouchView"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        app:axis="horizontal"
         app:layout_constraintEnd_toStartOf="@id/throttleTouchView"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -58,6 +59,7 @@
         android:id="@+id/throttleTouchView"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        app:axis="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/steerTouchView" />
 

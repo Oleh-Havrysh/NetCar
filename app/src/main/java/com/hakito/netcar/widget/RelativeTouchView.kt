@@ -4,14 +4,17 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.hakito.netcar.R
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+class RelativeTouchView(context: Context?, val attrs: AttributeSet?) : View(context, attrs) {
 
     private var basePoint: Vector? = null
     private var touchPoint: Vector? = null
@@ -19,6 +22,9 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
         style = Paint.Style.STROKE
         isAntiAlias = true
     }
+    private val axis: Axis
+
+    private val workRect = RectF()
 
     val progress: Vector?
         get() {
@@ -33,6 +39,33 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
     fun resetTouch() {
         basePoint = null
         touchPoint = null
+    }
+
+    init {
+        if (isInEditMode) {
+            basePoint = Vector(500f, 500f)
+            touchPoint = Vector(300f, 200f)
+            axis = Axis.HORIZONTAL
+        } else {
+            axis = getAxisFromAttributes()
+        }
+    }
+
+    private fun getAxisFromAttributes(): Axis {
+        attrs ?: return Axis.VERTICAL
+
+        context.theme.obtainStyledAttributes(attrs, R.styleable.RelativeTouchView, 0, 0)
+            .apply {
+                try {
+                    return when (getInteger(R.styleable.RelativeTouchView_axis, 0)) {
+                        1 -> Axis.HORIZONTAL
+                        2 -> Axis.VERTICAL
+                        else -> Axis.BIDIRECTIONAL
+                    }
+                } finally {
+                    recycle()
+                }
+            }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -61,19 +94,48 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
         super.onDraw(canvas)
         val workZoneRadius = getWorkZoneRadius()
         if (basePoint != null) {
-            canvas.drawCircle(basePoint!!.x, basePoint!!.y, workZoneRadius, paint)
+            when (axis) {
+                Axis.HORIZONTAL -> drawVawes(canvas, 0f, 5)
+                Axis.VERTICAL -> drawVawes(canvas, 90f, 5)
+                Axis.BIDIRECTIONAL -> canvas.drawCircle(
+                    basePoint!!.x,
+                    basePoint!!.y,
+                    workZoneRadius,
+                    paint
+                )
+            }
         }
         if (basePoint != null && touchPoint != null) {
             canvas.drawLine(basePoint!!.x, basePoint!!.y, touchPoint!!.x, touchPoint!!.y, paint)
             canvas.drawCircle(basePoint!!.x, basePoint!!.y, 10f, paint)
             canvas.drawCircle(touchPoint!!.x, touchPoint!!.y, 10f, paint)
 
+            val radius = when (axis) {
+                Axis.HORIZONTAL -> abs(progress!!.times(workZoneRadius).x)
+                Axis.VERTICAL -> abs(progress!!.times(workZoneRadius).y)
+                Axis.BIDIRECTIONAL -> progress!!.times(workZoneRadius).len()
+            }
             canvas.drawCircle(
                 basePoint!!.x,
                 basePoint!!.y,
-                progress!!.times(workZoneRadius).len(),
+                radius,
                 paint
             )
+        }
+    }
+
+    private fun drawVawes(canvas: Canvas, startAngle: Float, vawesCount: Int) {
+        val workZoneRadius = getWorkZoneRadius()
+        workRect.set(
+            basePoint!!.x - workZoneRadius,
+            basePoint!!.y - workZoneRadius,
+            basePoint!!.x + workZoneRadius,
+            basePoint!!.y + workZoneRadius
+        )
+        for (i in 0..vawesCount) {
+            canvas.drawArc(workRect, startAngle - 15f, 30f, false, paint)
+            canvas.drawArc(workRect, startAngle + 165f, 30f, false, paint)
+            workRect.inset(workZoneRadius / vawesCount, workZoneRadius / vawesCount)
         }
     }
 
@@ -99,5 +161,9 @@ class RelativeTouchView(context: Context?, attrs: AttributeSet?) : View(context,
         companion object {
             val ZERO = Vector(0f, 0f)
         }
+    }
+
+    enum class Axis {
+        HORIZONTAL, VERTICAL, BIDIRECTIONAL
     }
 }
