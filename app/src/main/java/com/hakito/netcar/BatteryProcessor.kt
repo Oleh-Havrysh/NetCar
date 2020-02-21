@@ -3,7 +3,11 @@ package com.hakito.netcar
 import android.graphics.Color
 import kotlin.math.roundToInt
 
-class BatteryProcessor(private val preferences: ControlPreferences) {
+class BatteryProcessor(
+    private val preferences: ControlPreferences,
+    private val onBatteryLow: () -> Unit
+) {
+    private var lowBatteryCount = 0
 
     fun processRawVoltage(rawVoltage: Int): BatteryUi {
         val voltage = rawVoltage * preferences.voltageMultiplier
@@ -17,6 +21,13 @@ class BatteryProcessor(private val preferences: ControlPreferences) {
         val color = when {
             percents < 25 -> Color.RED
             else -> Color.BLACK
+        }
+
+        if (percents < 20) lowBatteryCount++ else lowBatteryCount = 0
+
+        if (lowBatteryCount > 1000) {
+            onBatteryLow()
+            lowBatteryCount = 0
         }
 
         return BatteryUi(voltageString, color)

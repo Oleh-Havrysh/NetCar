@@ -15,6 +15,7 @@ import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarResponse
 import com.hakito.netcar.sender.CarSender
 import com.hakito.netcar.sender.CarSenderImpl
+import com.hakito.netcar.voice.indication.VoiceIndicator
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_main.*
@@ -73,6 +74,8 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
     private val controls: ControlsInterface?
         get() = supportFragmentManager.findFragmentById(R.id.controlsFragmentContainer) as? ControlsInterface
 
+    private var voiceIndicator: VoiceIndicator? = null
+
     override val layoutRes = R.layout.activity_main
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,7 +85,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         showControls()
 
         stabilizationController = StabilizationController(controlPreferences)
-        batteryProcessor = BatteryProcessor(controlPreferences)
+        batteryProcessor = BatteryProcessor(controlPreferences) { voiceIndicator?.batteryLow() }
 
         dashboardButton.setOnClickListener {
             supportFragmentManager
@@ -114,6 +117,15 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         gaugesCheckBox.setOnCheckedChangeListener { _, isChecked ->
             gaugesGroup.isVisible = isChecked
         }
+
+        if (controlPreferences.voiceIndication) {
+            voiceIndicator = VoiceIndicator(this)
+        }
+    }
+
+    override fun onDestroy() {
+        voiceIndicator?.shutdown()
+        super.onDestroy()
     }
 
     private fun showControls() {

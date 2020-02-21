@@ -86,6 +86,12 @@
             android:layout_height="wrap_content"
             android:max="1000" />
 
+        <CheckBox
+            android:id="@+id/voiceIndicationCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Voice indication" />
+
         <include layout="@layout/divider" />
 
         <TextView

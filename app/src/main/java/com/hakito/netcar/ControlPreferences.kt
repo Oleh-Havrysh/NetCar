@@ -85,6 +85,8 @@ class ControlPreferences(context: Context) {
             controlTypeInt = value.ordinal
         }
 
+    var voiceIndication by BooleanDelegate("VOICE_INDICATION")
+
     inner class FloatDelegate(private val key: String, private val default: Float = 0f) :
         ReadWriteProperty<ControlPreferences, Float> {
 

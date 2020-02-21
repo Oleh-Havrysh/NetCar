@@ -26,7 +26,7 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
 
     private lateinit var controlPreferences: ControlPreferences
 
-    private val cloudRepository = CloudRepository()
+    private val cloudRepository = CloudRepository.instance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +96,7 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
                 .fold({
                     val adapter =
                         ArrayAdapter<String>(
-                            context!!,
+                            context ?: return@fold,
                             android.R.layout.simple_dropdown_item_1line,
                             it
                         )
