@@ -34,6 +34,7 @@ class RelativeTouchView(context: Context?, val attrs: AttributeSet?) : View(cont
         }
 
     private val workRect = RectF()
+    private val ovalRect = RectF()
 
     val progress: Vector?
         get() {
@@ -106,12 +107,10 @@ class RelativeTouchView(context: Context?, val attrs: AttributeSet?) : View(cont
             when (axis) {
                 Axis.HORIZONTAL -> drawVawes(canvas, 0f, 5)
                 Axis.VERTICAL -> drawVawes(canvas, 90f, 5)
-                Axis.BIDIRECTIONAL -> canvas.drawCircle(
-                    basePoint!!.x,
-                    basePoint!!.y,
-                    workZoneRadius,
-                    paint
-                )
+                Axis.BIDIRECTIONAL -> {
+                    drawVawes(canvas, 0f, 5)
+                    drawVawes(canvas, 90f, 5)
+                }
             }
         }
         if (basePoint != null && touchPoint != null) {
@@ -124,12 +123,22 @@ class RelativeTouchView(context: Context?, val attrs: AttributeSet?) : View(cont
                 Axis.VERTICAL -> abs(progress!!.times(workZoneRadius).y)
                 Axis.BIDIRECTIONAL -> progress!!.times(workZoneRadius).len()
             }
-            canvas.drawCircle(
-                basePoint!!.x,
-                basePoint!!.y,
-                radius,
-                paint
-            )
+            when (axis) {
+                Axis.HORIZONTAL,
+                Axis.VERTICAL ->
+                    canvas.drawCircle(basePoint!!.x, basePoint!!.y, radius, paint)
+                Axis.BIDIRECTIONAL -> {
+                    val dx = abs(progress!!.x * workZoneRadius)
+                    val dy = abs(progress!!.y * workZoneRadius)
+                    ovalRect.set(
+                        basePoint!!.x - dx,
+                        basePoint!!.y - dy,
+                        basePoint!!.x + dx,
+                        basePoint!!.y + dy
+                    )
+                    canvas.drawOval(ovalRect, paint)
+                }
+            }
         }
     }
 
