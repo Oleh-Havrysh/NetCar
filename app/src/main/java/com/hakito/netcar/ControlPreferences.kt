@@ -77,6 +77,14 @@ class ControlPreferences(context: Context) {
 
     var backgroundBrightness by FloatDelegate("BACKGROUND_BRIGHTNESS", 0.2f)
 
+    private var controlTypeInt by IntDelegate("CONTROL_TYPE", 0)
+
+    var controlType: ControlsType
+        get() = ControlsType.values().first { it.ordinal == controlTypeInt }
+        set(value) {
+            controlTypeInt = value.ordinal
+        }
+
     inner class FloatDelegate(private val key: String, private val default: Float = 0f) :
         ReadWriteProperty<ControlPreferences, Float> {
 

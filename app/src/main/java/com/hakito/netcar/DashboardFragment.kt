@@ -73,6 +73,21 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
         loadButton.setOnClickListener { onLoadClick() }
 
         loadConfigNames()
+
+        controlsTypeRadioGroup.check(
+            when (controlPreferences.controlType) {
+                ControlsType.SEPARATE -> R.id.separateControlsButton
+                ControlsType.SINGLE -> R.id.singleControlButton
+            }
+        )
+
+        controlsTypeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            controlPreferences.controlType = when (checkedId) {
+                R.id.separateControlsButton -> ControlsType.SEPARATE
+                R.id.singleControlButton -> ControlsType.SINGLE
+                else -> throw IllegalStateException("Unsupported controls type")
+            }
+        }
     }
 
     private fun loadConfigNames() {

@@ -28,13 +28,6 @@
         app:layout_constraintTop_toBottomOf="@id/batteryTextView"
         tools:text="Statistics" />
 
-    <View
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="#51000000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <com.jjoe64.graphview.GraphView
         android:id="@+id/timeGraph"
         android:layout_width="200dp"
@@ -49,21 +42,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.hakito.netcar.widget.RelativeTouchView
-        android:id="@+id/steerTouchView"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        app:axis="horizontal"
-        app:layout_constraintEnd_toStartOf="@id/throttleTouchView"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <com.hakito.netcar.widget.RelativeTouchView
-        android:id="@+id/throttleTouchView"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        app:axis="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/steerTouchView" />
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/controlsFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <ImageButton
         android:id="@+id/dashboardButton"

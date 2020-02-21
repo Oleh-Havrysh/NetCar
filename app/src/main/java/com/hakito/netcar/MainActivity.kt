@@ -5,7 +5,12 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.fragment.app.commitNow
+import com.hakito.netcar.controls.ControlsInterface
+import com.hakito.netcar.controls.SeparateControlsFragment
+import com.hakito.netcar.controls.SingleControlsFragment
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarResponse
 import com.hakito.netcar.sender.CarSender
@@ -65,11 +70,16 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private lateinit var batteryProcessor: BatteryProcessor
 
+    private val controls: ControlsInterface?
+        get() = supportFragmentManager.findFragmentById(R.id.controlsFragmentContainer) as? ControlsInterface
+
     override val layoutRes = R.layout.activity_main
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         controlPreferences = ControlPreferences(this)
+
+        showControls()
 
         stabilizationController = StabilizationController(controlPreferences)
         batteryProcessor = BatteryProcessor(controlPreferences)
@@ -101,11 +111,17 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
             responseHandlingChannel.consumeEach(::onResponse)
         }
 
-        adjustBrightness()
-
         gaugesCheckBox.setOnCheckedChangeListener { _, isChecked ->
             gaugesGroup.isVisible = isChecked
         }
+    }
+
+    private fun showControls() {
+        val fragment: Fragment = when (controlPreferences.controlType) {
+            ControlsType.SEPARATE -> SeparateControlsFragment()
+            ControlsType.SINGLE -> SingleControlsFragment()
+        }
+        supportFragmentManager.commitNow { add(R.id.controlsFragmentContainer, fragment) }
     }
 
     override fun onBrightnessChanged(brightness: Float) {
@@ -119,9 +135,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
         val linesColor =
             if (controlPreferences.backgroundBrightness < 0.5) Color.WHITE else Color.BLACK
-        listOf(throttleTouchView, steerTouchView).forEach {
-            it.linesColor = linesColor
-        }
+        controls?.setColor(linesColor)
     }
 
     private fun getGraphTime() = (System.currentTimeMillis() - graphStartTime) / 1000.0
@@ -159,10 +173,10 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        throttleTouchView.resetTouch()
-        steerTouchView.resetTouch()
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+        adjustBrightness()
+        controls?.resetValues()
         startSending()
     }
 
@@ -177,21 +191,18 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         sendingJob = launch(Dispatchers.IO) {
             while (true) {
                 try {
-                    if (throttleTouchView.progress != null) {
-                        desiredRpmSeekBar.progress = 0
-                    }
                     val throttle =
-                        (throttleTouchView.progress?.y ?: 0f)
+                        (controls?.getThrottle() ?: 0f)
                             .times(controlPreferences.throttleMax)
                             .let(stabilizationController::calcThrottle)
                             .times(ServoConstants.AMPLITUDE)
                             .let { it + it.sign * ServoConstants.AMPLITUDE * controlPreferences.throttleDeadzoneCompensation }
                             .plus(ServoConstants.CENTER)
                             .toInt()
-                    val steer = steerTouchView.progress?.x
-                        ?.let(stabilizationController::calcSteer)
-                        ?.times(if (controlPreferences.invertSteer) -1 else 1)
-                        ?.run { mapSteer(this) }
+                    val steer = (controls?.getSteer() ?: 0f)
+                        .let(stabilizationController::calcSteer)
+                        .times(if (controlPreferences.invertSteer) -1 else 1)
+                        .run { mapSteer(this) }
                     sendValue(steer, throttle)
                 } catch (e: IOException) {
                     e.printStackTrace()
