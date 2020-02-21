@@ -6,8 +6,12 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.view.children
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.hakito.netcar.base.BaseFragment
 import com.hakito.netcar.cloud.CloudRepository
@@ -41,9 +45,18 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
         }
 
         backgroundBrightnessSeekBar.setOnTouchListener { _, event ->
+            val viewsToHide =
+                (view as ViewGroup).children.first().let { it as ViewGroup }.children
+                    .filter { it.id != backgroundBrightnessSeekBar.id }
             when (event.action) {
-                MotionEvent.ACTION_DOWN -> view.background = ColorDrawable(Color.TRANSPARENT)
-                MotionEvent.ACTION_UP -> view.background = ColorDrawable(Color.WHITE)
+                MotionEvent.ACTION_DOWN -> {
+                    view.background = ColorDrawable(Color.TRANSPARENT)
+                    viewsToHide.forEach { it.isInvisible = true }
+                }
+                MotionEvent.ACTION_UP -> {
+                    view.background = ColorDrawable(Color.WHITE)
+                    viewsToHide.forEach { it.isVisible = true }
+                }
             }
             false
         }
