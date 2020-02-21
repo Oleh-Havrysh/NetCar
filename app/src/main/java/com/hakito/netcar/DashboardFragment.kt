@@ -1,6 +1,10 @@
 package com.hakito.netcar
 
+import android.annotation.SuppressLint
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -25,13 +29,24 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
         controlPreferences = ControlPreferences(context!!)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         requestTimeoutEditText.bindToInt(controlPreferences::requestTimeout)
 
         cameraEnabledCheckBox.bindToBoolean(controlPreferences::cameraEnabled)
         cameraRotationEditText.bindToInt(controlPreferences::cameraRotation)
 
-        backgroundBrightnessSeekBar.bindToFloat(controlPreferences::backgroundBrightness)
+        backgroundBrightnessSeekBar.bindToFloat(controlPreferences::backgroundBrightness) {
+            (activity as? OnBrightnessChangedListener)?.onBrightnessChanged(it)
+        }
+
+        backgroundBrightnessSeekBar.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> view.background = ColorDrawable(Color.TRANSPARENT)
+                MotionEvent.ACTION_UP -> view.background = ColorDrawable(Color.WHITE)
+            }
+            false
+        }
 
         voltageMultiplierEditText.addTextChangedListener {
             controlPreferences.voltageMultiplier = it.toString().toFloatOrNull() ?: 1f
@@ -142,5 +157,10 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
     private fun onSteerEndChanged(value: Float) {
         steerCenterSeekBar.percentMaxLimit = value
         controlPreferences.steerMax = value
+    }
+
+    interface OnBrightnessChangedListener {
+
+        fun onBrightnessChanged(brightness: Float)
     }
 }

@@ -11,9 +11,15 @@ fun CheckBox.bindToBoolean(property: KMutableProperty<Boolean>) {
     setOnCheckedChangeListener { _, isChecked -> property.setter.call(isChecked) }
 }
 
-fun LimitedSeekBar.bindToFloat(property: KMutableProperty<Float>) {
+fun LimitedSeekBar.bindToFloat(
+    property: KMutableProperty<Float>,
+    onProgressChanged: (Float) -> Unit = {}
+) {
     percentProgress = property.getter.call()
-    onProgressChangedListener = { property.setter.call(it) }
+    onProgressChangedListener = {
+        property.setter.call(it)
+        onProgressChanged(it)
+    }
 }
 
 fun EditText.bindToInt(property: KMutableProperty<Int>) {

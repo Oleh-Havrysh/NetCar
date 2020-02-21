@@ -3,11 +3,13 @@ package com.hakito.netcar.widget
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.ColorInt
 import com.hakito.netcar.R
 import kotlin.math.abs
 import kotlin.math.min
@@ -23,6 +25,13 @@ class RelativeTouchView(context: Context?, val attrs: AttributeSet?) : View(cont
         isAntiAlias = true
     }
     private val axis: Axis
+
+    @ColorInt
+    var linesColor: Int = Color.BLACK
+        set(value) {
+            field = value
+            paint.color = value
+        }
 
     private val workRect = RectF()
 
@@ -88,7 +97,7 @@ class RelativeTouchView(context: Context?, val attrs: AttributeSet?) : View(cont
         return true
     }
 
-    private fun getWorkZoneRadius() = min(width, height) * 0.45f
+    private fun getWorkZoneRadius() = min(width, height) * 0.4f
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)

@@ -22,7 +22,7 @@ import java.io.IOException
 import kotlin.math.max
 import kotlin.math.sign
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListener {
 
     private var sendingJob: Job? = null
 
@@ -102,12 +102,26 @@ class MainActivity : BaseActivity() {
         }
 
         adjustBrightness()
+
+        gaugesCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            gaugesGroup.isVisible = isChecked
+        }
+    }
+
+    override fun onBrightnessChanged(brightness: Float) {
+        adjustBrightness()
     }
 
     private fun adjustBrightness() {
         val brightness = (controlPreferences.backgroundBrightness * 255).toInt()
         val color = Color.rgb(brightness, brightness, brightness)
         window.setBackgroundDrawable(ColorDrawable(color))
+
+        val linesColor =
+            if (controlPreferences.backgroundBrightness < 0.5) Color.WHITE else Color.BLACK
+        listOf(throttleTouchView, steerTouchView).forEach {
+            it.linesColor = linesColor
+        }
     }
 
     private fun getGraphTime() = (System.currentTimeMillis() - graphStartTime) / 1000.0
