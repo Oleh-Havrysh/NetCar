@@ -7,6 +7,8 @@ interface CarSender {
     suspend fun send(params: CarParams): CarResponse
 
     suspend fun getImage(): Bitmap
+
+    suspend fun ping(): Boolean
 }
 
 data class CarParams(val steer: Int, var throttle: Int, val light: Int)

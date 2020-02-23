@@ -16,6 +16,7 @@ import com.hakito.netcar.sender.CarResponse
 import com.hakito.netcar.sender.CarSender
 import com.hakito.netcar.sender.CarSenderImpl
 import com.hakito.netcar.voice.indication.VoiceIndicator
+import com.hakito.netcar.work.CarEnabledChecker
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_main.*
@@ -74,6 +75,8 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
     private val controls: ControlsInterface?
         get() = supportFragmentManager.findFragmentById(R.id.controlsFragmentContainer) as? ControlsInterface
 
+    private lateinit var carEnabledChecker: CarEnabledChecker
+
     private var voiceIndicator: VoiceIndicator? = null
 
     override val layoutRes = R.layout.activity_main
@@ -121,6 +124,18 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         if (controlPreferences.voiceIndication) {
             voiceIndicator = VoiceIndicator(this)
         }
+
+        carEnabledChecker = CarEnabledChecker(applicationContext)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        carEnabledChecker.onAppStart()
+    }
+
+    override fun onStop() {
+        carEnabledChecker.onAppStop()
+        super.onStop()
     }
 
     override fun onDestroy() {

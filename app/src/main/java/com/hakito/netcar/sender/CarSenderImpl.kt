@@ -55,6 +55,11 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
         throw IOException("Request failed")
     }
 
+    override suspend fun ping(): Boolean {
+        val pingRequst = Request.Builder().url("http://192.168.4.1:80/ping").build()
+        return runCatching { client.newCall(pingRequst).execute() }.isSuccess
+    }
+
     @VisibleForTesting
     fun buildUrl(params: CarParams): HttpUrl = HttpUrl.Builder()
         .scheme("http")

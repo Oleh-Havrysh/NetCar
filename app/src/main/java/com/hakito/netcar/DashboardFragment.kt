@@ -30,7 +30,7 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        controlPreferences = ControlPreferences(context!!)
+        controlPreferences = ControlPreferences(requireContext())
     }
 
     @SuppressLint("ClickableViewAccessibility")

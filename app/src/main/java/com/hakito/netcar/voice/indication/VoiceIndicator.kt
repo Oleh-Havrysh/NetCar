@@ -3,13 +3,13 @@ package com.hakito.netcar.voice.indication
 import android.content.Context
 import android.speech.tts.TextToSpeech
 
-class VoiceIndicator {
+class VoiceIndicator(context: Context) {
 
     private val textToSpeech: TextToSpeech
 
     private var inited = false
 
-    constructor(context: Context) {
+    init {
         textToSpeech = TextToSpeech(context) {
             inited = it == TextToSpeech.SUCCESS
         }
