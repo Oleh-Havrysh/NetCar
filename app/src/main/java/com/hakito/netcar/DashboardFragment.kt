@@ -74,6 +74,8 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
 
         loadConfigNames()
 
+        voiceIndicationCheckBox.bindToBoolean(controlPreferences::voiceIndication)
+
         controlsTypeRadioGroup.check(
             when (controlPreferences.controlType) {
                 ControlsType.SEPARATE -> R.id.separateControlsButton
