@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import com.hakito.netcar.ControlPreferences
 import com.hakito.netcar.R
 import com.hakito.netcar.sender.CarSenderImpl
+import com.hakito.netcar.wifi.WifiHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -16,7 +17,8 @@ class CheckCarEnabledWorker(private val context: Context, workerParameters: Work
 
     override suspend fun doWork(): Result {
         val pingResult = CarSenderImpl(ControlPreferences(context)).ping()
-        if (pingResult) {
+        val carWifiEnabled = WifiHelper(context).getWifiNetworks().any { it.contains("car", true) }
+        if (pingResult || carWifiEnabled) {
             withContext(Dispatchers.Main) {
                 showCarEnabledNotification()
             }
