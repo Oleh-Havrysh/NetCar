@@ -21,17 +21,13 @@ import com.hakito.netcar.util.bindToInt
 import com.hakito.netcar.util.launchWithProgressAndErrorHandling
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
 
-    private lateinit var controlPreferences: ControlPreferences
+    private val controlPreferences: ControlPreferences by inject()
 
-    private val cloudRepository = CloudRepository.instance
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        controlPreferences = ControlPreferences(requireContext())
-    }
+    private val cloudRepository: CloudRepository by inject()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

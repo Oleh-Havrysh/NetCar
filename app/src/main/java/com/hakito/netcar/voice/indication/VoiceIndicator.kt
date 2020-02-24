@@ -3,20 +3,20 @@ package com.hakito.netcar.voice.indication
 import android.content.Context
 import android.speech.tts.TextToSpeech
 
-class VoiceIndicator(context: Context) {
+class VoiceIndicator(private val context: Context) {
 
-    private val textToSpeech: TextToSpeech
+    private var textToSpeech: TextToSpeech? = null
 
     private var inited = false
 
-    init {
+    fun initialize() {
         textToSpeech = TextToSpeech(context) {
             inited = it == TextToSpeech.SUCCESS
         }
     }
 
     fun shutdown() {
-        textToSpeech.shutdown()
+        textToSpeech?.shutdown()
     }
 
     fun batteryLow() {
@@ -25,7 +25,7 @@ class VoiceIndicator(context: Context) {
 
     private fun say(text: String) {
         if (inited) {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_ADD, hashMapOf<String, String>())
+            textToSpeech?.speak(text, TextToSpeech.QUEUE_ADD, hashMapOf<String, String>())
         }
     }
 }

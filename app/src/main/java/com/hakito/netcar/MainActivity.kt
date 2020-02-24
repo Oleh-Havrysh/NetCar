@@ -14,7 +14,6 @@ import com.hakito.netcar.controls.SingleControlsFragment
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarResponse
 import com.hakito.netcar.sender.CarSender
-import com.hakito.netcar.sender.CarSenderImpl
 import com.hakito.netcar.voice.indication.VoiceIndicator
 import com.hakito.netcar.work.CarEnabledChecker
 import com.jjoe64.graphview.series.DataPoint
@@ -25,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import java.io.IOException
 import kotlin.math.max
 import kotlin.math.sign
@@ -33,9 +33,9 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private var sendingJob: Job? = null
 
-    private lateinit var sender: CarSender
+    private val sender: CarSender by inject()
 
-    private lateinit var controlPreferences: ControlPreferences
+    private val controlPreferences: ControlPreferences by inject()
 
     private var graphStartTime = System.currentTimeMillis()
     private var maxTime = 0L
@@ -63,32 +63,27 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private val controlCounter = OperationsPerSecondCounter(50)
 
-    private lateinit var stabilizationController: StabilizationController
+    private val stabilizationController: StabilizationController by inject()
 
     private var lastSteerValue = 0
     private var lastThrottleValue = 0
 
     private val responseHandlingChannel = Channel<CarResponse?>(Channel.CONFLATED)
 
-    private lateinit var batteryProcessor: BatteryProcessor
+    private val batteryProcessor: BatteryProcessor by inject()
 
     private val controls: ControlsInterface?
         get() = supportFragmentManager.findFragmentById(R.id.controlsFragmentContainer) as? ControlsInterface
 
-    private lateinit var carEnabledChecker: CarEnabledChecker
+    private val carEnabledChecker: CarEnabledChecker by inject()
 
-    private var voiceIndicator: VoiceIndicator? = null
+    private val voiceIndicator: VoiceIndicator by inject()
 
     override val layoutRes = R.layout.activity_main
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        controlPreferences = ControlPreferences(this)
-
         showControls()
-
-        stabilizationController = StabilizationController(controlPreferences)
-        batteryProcessor = BatteryProcessor(controlPreferences) { voiceIndicator?.batteryLow() }
 
         dashboardButton.setOnClickListener {
             supportFragmentManager
@@ -101,8 +96,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         initTimeGraph()
         initRpmGraph()
 
-        sender = CarSenderImpl(controlPreferences)
-
         desiredRpmSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 stabilizationController.targetCruiseRpm = progress
@@ -113,6 +106,8 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        batteryProcessor.onBatteryLow = voiceIndicator::batteryLow
+
         launch {
             responseHandlingChannel.consumeEach(::onResponse)
         }
@@ -121,11 +116,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
             gaugesGroup.isVisible = isChecked
         }
 
-        if (controlPreferences.voiceIndication) {
-            voiceIndicator = VoiceIndicator(this)
-        }
-
-        carEnabledChecker = CarEnabledChecker(applicationContext)
+        if (controlPreferences.voiceIndication) voiceIndicator.initialize()
     }
 
     override fun onStart() {
@@ -139,7 +130,8 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
     }
 
     override fun onDestroy() {
-        voiceIndicator?.shutdown()
+        voiceIndicator.shutdown()
+        batteryProcessor.onBatteryLow = null
         super.onDestroy()
     }
 

@@ -4,9 +4,10 @@ import android.graphics.Color
 import kotlin.math.roundToInt
 
 class BatteryProcessor(
-    private val preferences: ControlPreferences,
-    private val onBatteryLow: () -> Unit
+    private val preferences: ControlPreferences
 ) {
+    var onBatteryLow: (() -> Unit)? = null
+
     private var lowBatteryCount = 0
 
     fun processRawVoltage(rawVoltage: Int): BatteryUi {
@@ -26,7 +27,7 @@ class BatteryProcessor(
         if (percents < 20) lowBatteryCount++ else lowBatteryCount = 0
 
         if (lowBatteryCount > 1000) {
-            onBatteryLow()
+            onBatteryLow?.invoke()
             lowBatteryCount = 0
         }
 

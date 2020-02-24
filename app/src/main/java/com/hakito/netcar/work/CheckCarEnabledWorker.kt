@@ -5,18 +5,20 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.hakito.netcar.ControlPreferences
 import com.hakito.netcar.R
-import com.hakito.netcar.sender.CarSenderImpl
+import com.hakito.netcar.sender.CarSender
 import com.hakito.netcar.wifi.WifiHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.context.GlobalContext.get
 
 class CheckCarEnabledWorker(private val context: Context, workerParameters: WorkerParameters) :
     CoroutineWorker(context, workerParameters) {
 
+    private val carSender: CarSender by get().koin.inject()
+
     override suspend fun doWork(): Result {
-        val pingResult = CarSenderImpl(ControlPreferences(context)).ping()
+        val pingResult = carSender.ping()
         val carWifiEnabled = WifiHelper(context).getWifiNetworks().any { it.contains("car", true) }
         if (pingResult || carWifiEnabled) {
             withContext(Dispatchers.Main) {

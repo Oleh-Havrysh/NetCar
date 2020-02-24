@@ -76,9 +76,4 @@ class CloudRepository {
         cruiseDiffDependsOnThrottle = cruiseDiffDependsOnThrottle,
         speedDependantSteerLimit = speedDependantSteerLimit
     )
-
-    companion object {
-
-        val instance by lazy { CloudRepository() }
-    }
 }
