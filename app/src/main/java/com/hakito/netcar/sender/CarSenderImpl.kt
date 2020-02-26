@@ -1,7 +1,5 @@
 package com.hakito.netcar.sender
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.annotation.VisibleForTesting
 import com.google.gson.Gson
 import com.hakito.netcar.ControlPreferences
@@ -38,20 +36,6 @@ class CarSenderImpl(preferences: ControlPreferences) : CarSender {
             )
         }
 
-        throw IOException("Request failed")
-    }
-
-    override suspend fun getImage(): Bitmap {
-        val request = Request.Builder()
-            .url("http://192.168.4.1:80/camera")
-            .get()
-            .build()
-
-        val response = client.newCall(request).execute()
-
-        if (response.isSuccessful) {
-            return BitmapFactory.decodeStream(response.body()!!.byteStream())
-        }
         throw IOException("Request failed")
     }
 

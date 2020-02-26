@@ -6,6 +6,10 @@ import com.hakito.netcar.StabilizationController
 import com.hakito.netcar.cloud.CloudRepository
 import com.hakito.netcar.sender.CarSender
 import com.hakito.netcar.sender.CarSenderImpl
+import com.hakito.netcar.util.ErrorsController
+import com.hakito.netcar.util.ResponseTimeGraphController
+import com.hakito.netcar.util.StatisticsController
+import com.hakito.netcar.util.WheelRpmGraphController
 import com.hakito.netcar.voice.indication.VoiceIndicator
 import com.hakito.netcar.wifi.WifiHelper
 import com.hakito.netcar.work.CarEnabledChecker
@@ -22,5 +26,9 @@ object Modules {
         single { StabilizationController(get()) }
         single { CloudRepository() }
         single { BatteryProcessor(get()) }
+        single { ErrorsController() }
+        single { WheelRpmGraphController() }
+        single { ResponseTimeGraphController() }
+        single { StatisticsController(get()) }
     }
 }

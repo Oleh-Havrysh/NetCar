@@ -14,10 +14,12 @@ import com.hakito.netcar.controls.SingleControlsFragment
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarResponse
 import com.hakito.netcar.sender.CarSender
+import com.hakito.netcar.util.ErrorsController
+import com.hakito.netcar.util.ResponseTimeGraphController
+import com.hakito.netcar.util.StatisticsController
+import com.hakito.netcar.util.WheelRpmGraphController
 import com.hakito.netcar.voice.indication.VoiceIndicator
 import com.hakito.netcar.work.CarEnabledChecker
-import com.jjoe64.graphview.series.DataPoint
-import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,7 +28,6 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import java.io.IOException
-import kotlin.math.max
 import kotlin.math.sign
 
 class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListener {
@@ -37,36 +38,15 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private val controlPreferences: ControlPreferences by inject()
 
-    private var graphStartTime = System.currentTimeMillis()
-    private var maxTime = 0L
-
-    private val timeSeries = LineGraphSeries<DataPoint>()
-    private val rpmFrontLeftSeries = LineGraphSeries<DataPoint>()
-        .apply {
-            this.title = "FL"
-            this.color = Color.RED
-        }
-    private val rpmFrontRightSeries = LineGraphSeries<DataPoint>()
-        .apply {
-            this.title = "FR"
-            this.color = Color.BLUE
-        }
-    private val rpmRearSeries = LineGraphSeries<DataPoint>()
-        .apply {
-            this.title = "R"
-            this.color = Color.GREEN
-        }
-
-    private val errorsMap = mutableMapOf<String, Int>()
-
-    private var maxSpeed = 0
-
-    private val controlCounter = OperationsPerSecondCounter(50)
-
     private val stabilizationController: StabilizationController by inject()
 
-    private var lastSteerValue = 0
-    private var lastThrottleValue = 0
+    private val errorsController: ErrorsController by inject()
+
+    private val wheelRpmGraphController: WheelRpmGraphController by inject()
+
+    private val responseTimeGraphController: ResponseTimeGraphController by inject()
+
+    private val statisticsController: StatisticsController by inject()
 
     private val responseHandlingChannel = Channel<CarResponse?>(Channel.CONFLATED)
 
@@ -157,11 +137,10 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         controls?.setColor(linesColor)
     }
 
-    private fun getGraphTime() = (System.currentTimeMillis() - graphStartTime) / 1000.0
 
     private fun initTimeGraph() {
         timeGraph.apply {
-            addSeries(timeSeries)
+            addSeries(responseTimeGraphController.timeSeries)
             gridLabelRenderer.isHorizontalLabelsVisible = false
             viewport.apply {
                 isXAxisBoundsManual = true
@@ -176,9 +155,9 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private fun initRpmGraph() {
         rpmGraph.apply {
-            addSeries(rpmFrontLeftSeries)
+            addSeries(wheelRpmGraphController.rpmFrontLeftSeries)
             //addSeries(rpmFrontRightSeries)
-            addSeries(rpmRearSeries)
+            addSeries(wheelRpmGraphController.rpmRearSeries)
             legendRenderer.isVisible = true
             gridLabelRenderer.isHorizontalLabelsVisible = false
             viewport.apply {
@@ -203,8 +182,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         super.onPause()
         stopSending()
     }
-
-    var cameraJob: Job? = null
 
     private fun startSending() {
         sendingJob = launch(Dispatchers.IO) {
@@ -240,8 +217,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private suspend fun sendValue(steer: Float?, throttle: Int) {
         val steerValue = steer?.toInt() ?: controlPreferences.steerCenter.toServoValue().toInt()
-        lastSteerValue = steerValue
-        lastThrottleValue = throttle
+        statisticsController.handleInputParams(steerValue = steerValue, throttleValue = throttle)
         val response =
             try {
                 sender.send(
@@ -251,18 +227,11 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
                         (controlPreferences.light * 1023).toInt()
                     )
                 )
-                    .also { controlCounter.onPerformed() }
+                    .also { statisticsController.onRequestPerformed() }
             } catch (e: IOException) {
-                e.printStackTrace()
-                val errorName = e.message!!
-                val count = errorsMap[errorName] ?: 0
-                errorsMap[errorName] = count + 1
+                errorsController.onError(e)
                 null
             }
-
-        if (response != null) {
-            maxTime = max(response.responseTime, maxTime)
-        }
 
         response?.sensors?.also(stabilizationController::onSensorsReceived)
 
@@ -270,15 +239,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
     }
 
     private fun onResponse(response: CarResponse?) {
-        val speed = response?.sensors?.frontLeftRpm?.let { getSpeed(it) }
-        speed?.apply { maxSpeed = max(maxSpeed, this) }
-        statTextView.text =
-            """
-steer: $lastSteerValue, throttle: $lastThrottleValue
-speed = $speed kmh
-maxSpeed = $maxSpeed kmh
-control RPS = ${controlCounter.getRps()}
-$errorsMap"""
+        statTextView.text = statisticsController.getText()
 
         response?.sensors?.voltage?.let {
             val battery = batteryProcessor.processRawVoltage(it)
@@ -286,43 +247,18 @@ $errorsMap"""
             batteryTextView.setTextColor(battery.color)
         }
 
-        timeSeries.appendData(
-            DataPoint(
-                getGraphTime(),
-                response?.responseTime?.toDouble() ?: 0.0
-            ), true, 150
-        )
+        responseTimeGraphController.appendResponseTime(response?.responseTime)
         if (response != null) {
-            rpmFrontLeftSeries.appendData(
-                DataPoint(
-                    getGraphTime(),
-                    response.sensors.frontLeftRpm.toDouble()
-                ), true, 150
+            wheelRpmGraphController.appendRpm(
+                frontLeft = response.sensors.frontLeftRpm,
+                frontRight = response.sensors.frontRightRpm,
+                rear = response.sensors.rearRpm
             )
-/*            rpmFrontRightSeries.appendData(
-                DataPoint(
-                    getGraphTime(),
-                    response.sensors.frontRightRpm.toDouble()
-                ), true, 150
-            )*/
-            rpmRearSeries.appendData(
-                DataPoint(
-                    getGraphTime(),
-                    response.sensors.rearRpm.toDouble()
-                ), true, 150
-            )
-
             rpmWarningImageView.isVisible = stabilizationController.isStabilizationWarning()
         }
     }
 
-    private fun getSpeed(rpm: Int): Int {
-        val wheelLength = 7f * Math.PI
-        return ((rpm * 60 * wheelLength) / (100 * 1000)).toInt()
-    }
-
     private fun stopSending() {
         sendingJob?.cancel()
-        cameraJob?.cancel()
     }
 }

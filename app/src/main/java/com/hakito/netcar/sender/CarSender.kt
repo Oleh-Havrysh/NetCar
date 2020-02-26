@@ -1,12 +1,8 @@
 package com.hakito.netcar.sender
 
-import android.graphics.Bitmap
-
 interface CarSender {
 
     suspend fun send(params: CarParams): CarResponse
-
-    suspend fun getImage(): Bitmap
 
     suspend fun ping(): Boolean
 }
