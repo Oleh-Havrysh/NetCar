@@ -120,7 +120,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
             ControlsType.SEPARATE -> SeparateControlsFragment()
             ControlsType.SINGLE -> SingleControlsFragment()
         }
-        supportFragmentManager.commitNow { add(R.id.controlsFragmentContainer, fragment) }
+        supportFragmentManager.commitNow { replace(R.id.controlsFragmentContainer, fragment) }
     }
 
     override fun onBrightnessChanged(brightness: Float) {

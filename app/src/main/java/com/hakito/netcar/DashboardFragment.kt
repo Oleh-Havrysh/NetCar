@@ -85,6 +85,7 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
                 R.id.singleControlButton -> ControlsType.SINGLE
                 else -> throw IllegalStateException("Unsupported controls type")
             }
+            activity?.recreate()
         }
     }
 
