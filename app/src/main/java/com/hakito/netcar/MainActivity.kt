@@ -249,6 +249,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
         responseTimeGraphController.appendResponseTime(response?.responseTime)
         if (response != null) {
+            statisticsController.handleRpm(response.sensors.frontLeftRpm)
             wheelRpmGraphController.appendRpm(
                 frontLeft = response.sensors.frontLeftRpm,
                 frontRight = response.sensors.frontRightRpm,
