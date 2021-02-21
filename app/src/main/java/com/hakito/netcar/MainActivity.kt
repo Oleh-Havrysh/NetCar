@@ -3,6 +3,7 @@ package com.hakito.netcar
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.widget.SeekBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -14,11 +15,7 @@ import com.hakito.netcar.controls.SingleControlsFragment
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarResponse
 import com.hakito.netcar.sender.CarSender
-import com.hakito.netcar.util.ErrorsController
-import com.hakito.netcar.util.ResponseTimeGraphController
-import com.hakito.netcar.util.StatisticsController
-import com.hakito.netcar.util.WheelRpmGraphController
-import com.hakito.netcar.voice.indication.VoiceIndicator
+import com.hakito.netcar.util.*
 import com.hakito.netcar.work.CarEnabledChecker
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import java.io.IOException
 import kotlin.math.sign
@@ -57,8 +55,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private val carEnabledChecker: CarEnabledChecker by inject()
 
-    private val voiceIndicator: VoiceIndicator by inject()
-
     override val layoutRes = R.layout.activity_main
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,8 +82,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        batteryProcessor.onBatteryLow = voiceIndicator::batteryLow
-
         launch {
             responseHandlingChannel.consumeEach(::onResponse)
         }
@@ -95,8 +89,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         gaugesCheckBox.setOnCheckedChangeListener { _, isChecked ->
             gaugesGroup.isVisible = isChecked
         }
-
-        if (controlPreferences.voiceIndication) voiceIndicator.initialize()
     }
 
     override fun onStart() {
@@ -110,7 +102,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
     }
 
     override fun onDestroy() {
-        voiceIndicator.shutdown()
         batteryProcessor.onBatteryLow = null
         super.onDestroy()
     }
@@ -158,6 +149,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
             addSeries(wheelRpmGraphController.rpmFrontLeftSeries)
             //addSeries(rpmFrontRightSeries)
             addSeries(wheelRpmGraphController.rpmRearSeries)
+            addSeries(wheelRpmGraphController.throttleSeries)
             legendRenderer.isVisible = true
             gridLabelRenderer.isHorizontalLabelsVisible = false
             viewport.apply {
@@ -223,8 +215,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
                 sender.send(
                     CarParams(
                         steerValue,
-                        throttle,
-                        (controlPreferences.light * 1023).toInt()
+                        throttle
                     )
                 )
                     .also { statisticsController.onRequestPerformed() }
@@ -234,8 +225,10 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
             }
 
         response?.sensors?.also(stabilizationController::onSensorsReceived)
-
         responseHandlingChannel.offer(response)
+        withContext(Dispatchers.Main) {
+            wheelRpmGraphController.appendThrottle((throttle - ServoConstants.CENTER) * 5)
+        }
     }
 
     private fun onResponse(response: CarResponse?) {

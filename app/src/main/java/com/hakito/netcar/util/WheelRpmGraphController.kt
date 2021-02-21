@@ -24,6 +24,21 @@ class WheelRpmGraphController {
             this.color = Color.GREEN
         }
 
+    val throttleSeries = LineGraphSeries<DataPoint>()
+        .apply {
+            this.title = "TRQ"
+            this.color = Color.BLACK
+        }
+
+    fun appendThrottle(throttle:Int){
+        throttleSeries.appendData(
+            DataPoint(
+                getGraphTime(),
+                throttle.toDouble()
+            ), true, 150
+        )
+    }
+
     fun appendRpm(frontLeft: Int, frontRight: Int, rear: Int) {
         rpmFrontLeftSeries.appendData(
             DataPoint(

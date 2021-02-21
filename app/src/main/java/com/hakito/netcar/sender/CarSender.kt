@@ -7,7 +7,7 @@ interface CarSender {
     suspend fun ping(): Boolean
 }
 
-data class CarParams(val steer: Int, var throttle: Int, val light: Int)
+data class CarParams(val steer: Int, var throttle: Int)
 
 data class CarResponse(val responseTime: Long, val sensors: Sensors)
 

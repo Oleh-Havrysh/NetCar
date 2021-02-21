@@ -7,27 +7,20 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.core.view.children
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.hakito.netcar.base.BaseFragment
-import com.hakito.netcar.cloud.CloudRepository
 import com.hakito.netcar.util.bindToBoolean
 import com.hakito.netcar.util.bindToFloat
 import com.hakito.netcar.util.bindToInt
-import com.hakito.netcar.util.launchWithProgressAndErrorHandling
 import kotlinx.android.synthetic.main.fragment_dashboard.*
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
 class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
 
     private val controlPreferences: ControlPreferences by inject()
-
-    private val cloudRepository: CloudRepository by inject()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,11 +58,6 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
 
         invalidateCarConfig()
 
-        saveButton.setOnClickListener { onSaveClick() }
-        loadButton.setOnClickListener { onLoadClick() }
-
-        loadConfigNames()
-
         voiceIndicationCheckBox.bindToBoolean(controlPreferences::voiceIndication)
 
         controlsTypeRadioGroup.check(
@@ -88,43 +76,6 @@ class DashboardFragment : BaseFragment(R.layout.fragment_dashboard) {
             activity?.recreate()
         }
     }
-
-    private fun loadConfigNames() {
-        launch {
-            runCatching { cloudRepository.getConfigNames() }
-                .fold({
-                    val adapter =
-                        ArrayAdapter<String>(
-                            context ?: return@fold,
-                            android.R.layout.simple_dropdown_item_1line,
-                            it
-                        )
-                    configNameAutoCompleteTextView.setAdapter(adapter)
-                }, { Toast.makeText(context ?: return@fold, it.message, Toast.LENGTH_LONG).show() })
-        }
-    }
-
-    private fun onSaveClick() {
-        launchWithProgressAndErrorHandling {
-            cloudRepository.saveConfig(
-                getConfigName(),
-                controlPreferences.carConfig
-            )
-            Toast.makeText(context, "Config saved", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun onLoadClick() {
-        launchWithProgressAndErrorHandling {
-            val config = cloudRepository.loadConfig(getConfigName())
-                ?: throw Exception("Config was not found")
-            controlPreferences.carConfig = config
-            invalidateCarConfig()
-            Toast.makeText(context, "Config loaded", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun getConfigName() = configNameAutoCompleteTextView.text.toString()
 
     private fun invalidateCarConfig() {
         voltageMultiplierEditText.setText(controlPreferences.voltageMultiplier.toString())

@@ -1,6 +1,7 @@
 package com.hakito.netcar.work
 
 import android.content.Context
+import androidx.work.BackoffPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
@@ -20,6 +21,7 @@ class CarEnabledChecker(context: Context) {
             ExistingWorkPolicy.REPLACE,
             OneTimeWorkRequest.Builder(CheckCarEnabledWorker::class.java)
                 .setInitialDelay(15, TimeUnit.SECONDS)
+                .setBackoffCriteria(BackoffPolicy.LINEAR, 5L, TimeUnit.SECONDS)
                 .build()
         ).enqueue()
     }

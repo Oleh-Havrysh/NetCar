@@ -10,5 +10,8 @@ class WifiHelper(appContext: Context) {
     private val wifiManager =
         appContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
-    fun getWifiNetworks() = wifiManager.scanResults.map { it.SSID }
+    fun getWifiNetworks(): List<String> {
+        wifiManager.startScan()
+        return wifiManager.scanResults.map { it.SSID }
+    }
 }
