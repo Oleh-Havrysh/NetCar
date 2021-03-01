@@ -32,7 +32,7 @@ class ResponseTimeGraphController {
         rssiSeries.appendData(
             DataPoint(
                 getGraphTime(),
-                -rssi.toDouble() * 3
+                (100 + rssi.toDouble()) * 3
             ), true, 150
         )
     }
