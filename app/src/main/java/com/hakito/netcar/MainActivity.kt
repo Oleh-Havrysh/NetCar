@@ -2,8 +2,8 @@ package com.hakito.netcar
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.util.Log
 import android.widget.SeekBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -15,7 +15,10 @@ import com.hakito.netcar.controls.SingleControlsFragment
 import com.hakito.netcar.sender.CarParams
 import com.hakito.netcar.sender.CarResponse
 import com.hakito.netcar.sender.CarSender
-import com.hakito.netcar.util.*
+import com.hakito.netcar.util.ErrorsController
+import com.hakito.netcar.util.ResponseTimeGraphController
+import com.hakito.netcar.util.StatisticsController
+import com.hakito.netcar.util.WheelRpmGraphController
 import com.hakito.netcar.work.CarEnabledChecker
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +53,8 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private val batteryProcessor: BatteryProcessor by inject()
 
+    private lateinit var wifiManager: WifiManager
+
     private val controls: ControlsInterface?
         get() = supportFragmentManager.findFragmentById(R.id.controlsFragmentContainer) as? ControlsInterface
 
@@ -59,6 +64,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        wifiManager = getSystemService(WifiManager::class.java)
         showControls()
 
         dashboardButton.setOnClickListener {
@@ -132,6 +138,8 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
     private fun initTimeGraph() {
         timeGraph.apply {
             addSeries(responseTimeGraphController.timeSeries)
+            addSeries(responseTimeGraphController.rssiSeries)
+            legendRenderer.isVisible = true
             gridLabelRenderer.isHorizontalLabelsVisible = false
             viewport.apply {
                 isXAxisBoundsManual = true
@@ -195,6 +203,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
+                responseTimeGraphController.appendRssi(wifiManager.connectionInfo.rssi)
             }
         }
     }
