@@ -2,6 +2,8 @@ package com.hakito.netcar.sender
 
 interface CarSender {
 
+    var carIp: String
+
     suspend fun send(params: CarParams): CarResponse
 
     suspend fun ping(): Boolean

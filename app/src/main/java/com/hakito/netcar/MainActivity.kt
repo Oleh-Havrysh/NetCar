@@ -5,10 +5,12 @@ import android.graphics.drawable.ColorDrawable
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.commitNow
+import androidx.lifecycle.lifecycleScope
 import com.hakito.netcar.controls.ControlsInterface
 import com.hakito.netcar.controls.SeparateControlsFragment
 import com.hakito.netcar.controls.SingleControlsFragment
@@ -21,14 +23,14 @@ import com.hakito.netcar.util.StatisticsController
 import com.hakito.netcar.util.WheelRpmGraphController
 import com.hakito.netcar.work.CarEnabledChecker
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import java.io.IOException
+import java.net.Inet4Address
+import java.net.InetAddress
+import java.net.NetworkInterface
 import kotlin.math.sign
 
 class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListener {
@@ -94,6 +96,51 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
         gaugesCheckBox.setOnCheckedChangeListener { _, isChecked ->
             gaugesGroup.isVisible = isChecked
+        }
+
+        val wifiManager = getSystemService(WifiManager::class.java)
+        wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_LOW_LATENCY, "Low latency tag")
+            .acquire()
+
+        reconnectButton.setOnClickListener {
+            lifecycleScope.launchWhenCreated {
+                withContext(Dispatchers.IO) { getDevices() }
+                    .firstOrNull()
+                    ?.also {
+                        sender.carIp = it
+                        Toast.makeText(this@MainActivity, "Connected $it", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+            }
+        }
+    }
+
+    suspend fun getDevices(): List<String> {
+        val ipString = NetworkInterface.getNetworkInterfaces()
+            .toList()
+            .filterNot { it.isLoopback }
+            .flatMap { it.interfaceAddresses }
+            .map { it.address }
+            .filterIsInstance<Inet4Address>()
+            .singleOrNull()
+            .toString()
+            .substringAfter('/', "")
+        if (ipString.isEmpty()) return emptyList()
+        val prefix = ipString.substring(0, ipString.lastIndexOf(".") + 1)
+
+        return coroutineScope {
+            (0..254)
+                .map {
+                    async {
+                        val testIp = prefix + it.toString()
+                        val address = InetAddress.getByName(testIp)
+                        if (address.isReachable(250) && testIp != ipString) testIp
+                        else null
+                    }
+                }
+                .awaitAll()
+                .toList()
+                .filterNotNull()
         }
     }
 
@@ -203,7 +250,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
-                responseTimeGraphController.appendRssi(wifiManager.connectionInfo.rssi)
             }
         }
     }
@@ -235,7 +281,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
         response?.sensors?.also(stabilizationController::onSensorsReceived)
         responseHandlingChannel.offer(response)
-        withContext(Dispatchers.Main) {
+        launch(Dispatchers.Main) {
             wheelRpmGraphController.appendThrottle((throttle - ServoConstants.CENTER) * 5)
         }
     }
