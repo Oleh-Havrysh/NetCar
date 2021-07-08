@@ -10,15 +10,13 @@ import com.hakito.netcar.util.ResponseTimeGraphController
 import com.hakito.netcar.util.StatisticsController
 import com.hakito.netcar.util.WheelRpmGraphController
 import com.hakito.netcar.wifi.WifiHelper
-import com.hakito.netcar.work.CarEnabledChecker
 import org.koin.dsl.module
 
 object Modules {
 
     val appModule = module {
         single { ControlPreferences(get()) }
-        single { CarSenderImpl(get()) as CarSender }
-        single { CarEnabledChecker(get()) }
+        single { CarSenderImpl() as CarSender }
         single { WifiHelper(get()) }
         single { StabilizationController(get()) }
         single { BatteryProcessor(get()) }

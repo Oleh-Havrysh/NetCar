@@ -21,7 +21,6 @@ import com.hakito.netcar.util.ErrorsController
 import com.hakito.netcar.util.ResponseTimeGraphController
 import com.hakito.netcar.util.StatisticsController
 import com.hakito.netcar.util.WheelRpmGraphController
-import com.hakito.netcar.work.CarEnabledChecker
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -59,8 +58,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
 
     private val controls: ControlsInterface?
         get() = supportFragmentManager.findFragmentById(R.id.controlsFragmentContainer) as? ControlsInterface
-
-    private val carEnabledChecker: CarEnabledChecker by inject()
 
     override val layoutRes = R.layout.activity_main
 
@@ -142,16 +139,6 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
                 .toList()
                 .filterNotNull()
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        carEnabledChecker.onAppStart()
-    }
-
-    override fun onStop() {
-        carEnabledChecker.onAppStop()
-        super.onStop()
     }
 
     override fun onDestroy() {
@@ -245,7 +232,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
                     val steer = (controls?.getSteer() ?: 0f)
                         .let(stabilizationController::calcSteer)
                         .times(if (controlPreferences.invertSteer) -1 else 1)
-                        .run { mapSteer(this) }
+                        .let(::mapSteer)
                     sendValue(steer, throttle)
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -267,12 +254,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
         statisticsController.handleInputParams(steerValue = steerValue, throttleValue = throttle)
         val response =
             try {
-                sender.send(
-                    CarParams(
-                        steerValue,
-                        throttle
-                    )
-                )
+                sender.send(CarParams(steerValue, throttle))
                     .also { statisticsController.onRequestPerformed() }
             } catch (e: IOException) {
                 errorsController.onError(e)
