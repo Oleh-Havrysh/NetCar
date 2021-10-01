@@ -4,7 +4,7 @@ import com.hakito.netcar.BatteryProcessor
 import com.hakito.netcar.ControlPreferences
 import com.hakito.netcar.StabilizationController
 import com.hakito.netcar.sender.CarSender
-import com.hakito.netcar.sender.CarSenderImpl
+import com.hakito.netcar.sender.CarSenderUdpImpl
 import com.hakito.netcar.util.ErrorsController
 import com.hakito.netcar.util.ResponseTimeGraphController
 import com.hakito.netcar.util.StatisticsController
@@ -16,7 +16,7 @@ object Modules {
 
     val appModule = module {
         single { ControlPreferences(get()) }
-        single { CarSenderImpl() as CarSender }
+        single { CarSenderUdpImpl() as CarSender }
         single { WifiHelper(get()) }
         single { StabilizationController(get()) }
         single { BatteryProcessor(get()) }

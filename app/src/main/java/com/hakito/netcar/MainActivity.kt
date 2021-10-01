@@ -256,7 +256,7 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
             try {
                 sender.send(CarParams(steerValue, throttle))
                     .also { statisticsController.onRequestPerformed() }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 errorsController.onError(e)
                 null
             }
@@ -269,7 +269,9 @@ class MainActivity : BaseActivity(), DashboardFragment.OnBrightnessChangedListen
     }
 
     private fun onResponse(response: CarResponse?) {
-        statTextView.text = statisticsController.getText()
+        lifecycleScope.launch {
+            statTextView.text = statisticsController.getText()
+        }
 
         response?.sensors?.voltage?.let {
             val battery = batteryProcessor.processRawVoltage(it)

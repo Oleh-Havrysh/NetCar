@@ -33,15 +33,18 @@ class CarSenderImpl() : CarSender {
         }
         try {
             socket?.let { socket ->
+                var voltage = 0
                 val time = measureTimeMillis {
                     writer!!.write("t=${params.throttle}s=${params.steer}c=${params.steer + params.throttle}")
                     writer!!.flush()
 
-                    Log.d("qaz", "Response ${reader!!.readLine()}")
+                    val response = reader!!.readLine()
+                    voltage = response.substringAfter("v:").toIntOrNull() ?: 0
+                    Log.d("qaz", "Response $response")
                     reader!!.read()
                 }
                 delay(30)
-                return CarResponse(time, Sensors(0, 0, 0, 0))
+                return CarResponse(time, Sensors(0, 0, 0, voltage))
             }
         } catch (t: Throwable) {
             socket?.closeQuietly()
